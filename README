@@ -1,15 +1,3 @@
- Foobar
-
-Foobar is a Python library for dealing with word pluralization.
-
-## Installation
-
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
-
-```bash
-pip install foobar
-```
-
 ## Find-My-Pet Project
 
 The goal is to reunite people with their pets utilizing a web application
