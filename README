@@ -1,0 +1,37 @@
+ Foobar
+
+Foobar is a Python library for dealing with word pluralization.
+
+## Installation
+
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+
+```bash
+pip install foobar
+```
+
+## Find-My-Pet Project
+
+The goal is to reunite people with their pets utilizing a web application
+that takes posts, displays posts, and show where these posts originated on
+a map. We also have user interaction via comments on the posts.
+
+## Utility
+TBD
+
+## General
+
+This README will be updated to reflect the project and how to use it as
+features are created.
+
+## More Info
+Code is owned and written by:
+Jacob Low
+Spencer Loi
+Vinh Le
+Junchen Wang
+Anjali Prabha
+
+
+Starter code, and python framework was taken as base from
+Professor Luca de Alfaro
