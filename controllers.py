@@ -47,7 +47,25 @@ def serve_main():
     return dict()
 
 
-@action('nav-bar')
-@action.uses('../components/navbar.html')
-def serve_navbar():
+@action('about')
+@action.uses('../components/about.html')
+def serve_about():
+    return dict()
+
+
+@action('howto')
+@action.uses('../components/howto.html')
+def serve_howto():
+    return dict()
+
+
+@action('map')
+@action.uses('../components/map.html')
+def serve_map():
+    return dict()
+
+
+@action('settings')
+@action.uses('../components/settings.html')
+def serve_settings():
     return dict()
