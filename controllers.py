@@ -43,3 +43,4 @@ def index():
 @action.uses('../components/main.html')
 def serve_main():
     return dict()
+
