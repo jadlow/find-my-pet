@@ -33,14 +33,21 @@ from .models import get_user_email
 
 url_signer = URLSigner(session)
 
+
 @action('index')
 @action.uses(db, auth, 'index.html')
 def index():
     print("User:", get_user_email())
     return dict()
 
+
 @action('main-page')
 @action.uses('../components/main.html')
 def serve_main():
     return dict()
 
+
+@action('nav-bar')
+@action.uses('../components/navbar.html')
+def serve_navbar():
+    return dict()

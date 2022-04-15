@@ -8,13 +8,37 @@
     <link rel="stylesheet" href="css/bulma.css">
     <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.css">
     [[block page_head]]<!-- individual pages can customize header here -->[[end]]
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
   </head>
   <body>
     <!-- Navigation bar -->
-    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+    <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
-        <a class="navbar-item" href="[[=URL('index')]]">
-          Learn py4web
+          <a class="navbar-item" href="[[=URL('main')]]">
+              <img src="../static/images/pet.png" alt="Logo" height="28">
+        </a>
+          <a class="navbar-item" href="[[=URL('main')]]">
+              Find My Pet
+          <!-- <img class="logo" width="150" src="images/site_icon.png"> -->
+        </a>
+          <a class="navbar-item" href="[[=URL('about')]]">
+          About Us
+          <!-- <img class="logo" width="150" src="images/site_icon.png"> -->
+        </a>
+          <a class="navbar-item" href="[[=URL('how')]]">
+          How to?
+          <!-- <img class="logo" width="150" src="images/site_icon.png"> -->
+        </a>
+          <a class="navbar-item" href="[[=URL('pets')]]">
+          Lost & Found Pets
+          <!-- <img class="logo" width="150" src="images/site_icon.png"> -->
+        </a>
+          <a class="navbar-item" href="[[=URL('map')]]">
+          Map
+          <!-- <img class="logo" width="150" src="images/site_icon.png"> -->
+        </a>
+          <a class="navbar-item" href="[[=URL('settings')]]">
+          User Settings
           <!-- <img class="logo" width="150" src="images/site_icon.png"> -->
         </a>
 

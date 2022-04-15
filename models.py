@@ -19,7 +19,7 @@ def get_time():
 
 db.define_table('pet',
                 Field('pet_name', 'string', requires=IS_NOT_EMPTY()),
-                Field('user_email', 'string', default=get_user_email),  # Alternative
+                Field('auth_user_id', 'reference auth_user'),  # Alternative
                 Field('is_reunited', 'boolean'),
                 Field('description', 'text'),
                 Field('photo', 'text'),  # This contains the image URL, see Unit 18
@@ -29,7 +29,7 @@ db.define_table('pet',
                 )
 
 db.define_table('comment',
-                Field('user_email', 'string', default=get_user_email),  # Alternative
+                Field('auth_user_id', 'reference auth_user'),  # Alternative
                 Field('pet_id', 'reference pet'),
                 Field('post_date', 'datetime')
                 )
