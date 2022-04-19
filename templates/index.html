@@ -1,5 +1,39 @@
 [[extend 'layout.html']]
 
 <div class="section">
-   Hello.
+    <div class="container">
+        <table class="table is-striped is-fullwidth">
+        <tr>
+            <th>Id</th>
+            <th>Pet Name</th>
+            <th>Is Reunited</th>
+            <th>Description</th>
+            <th>Photo</th>
+            <th>Lat Long Square</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Creation Date</th>
+            <th></th>
+        </tr>
+        [[for row in rows:]]
+        <tr>
+            <td>[[=row.id]]</td>
+            <td>[[=row.pet_name]]</td>
+            <td>[[=row.is_reunited]]</td>
+            <td>[[=row.description]]</td>
+            <td>[[=row.photo]]</td>
+            <td>[[=row.pet_latlng_square]]</td>
+            <td>[[=row.pet_lat]]</td>
+            <td>[[=row.pet_lng]]</td>
+            <td>[[=row.creation_date]]</td>
+            <td>
+                <a class="button" href="[[=URL('edit', row.id)]]">
+                    <span class="icon"><i class="fa fa-fw fa-pencil"></i></span> <span>Edit</span>
+                </a>
+            </td>
+
+        </tr>
+        [[pass]]
+        </table>
+    </div>
 </div>

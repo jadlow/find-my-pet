@@ -30,6 +30,7 @@ from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
 from .models import get_user_email
+from py4web.utils.form import Form, FormStyleBulma
 
 url_signer = URLSigner(session)
 
@@ -37,8 +38,8 @@ url_signer = URLSigner(session)
 @action('index')
 @action.uses(db, auth, 'index.html')
 def index():
-    print("User:", get_user_email())
-    return dict()
+    rows = db(db.pet).select()
+    return dict(rows=rows, url_signer=url_signer)
 
 
 @action('main-page')
@@ -69,3 +70,43 @@ def serve_map():
 @action.uses('../components/settings.html')
 def serve_settings():
     return dict()
+
+
+@action('add', method=["GET", "POST"])
+@action.uses(db, session, auth.user, '../components/add.html')
+def add():
+    # Insert form: no record init
+    form = Form(db.pet, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        # We simply redirect; the insertion already happened
+        redirect(URL('index'))
+    # Either this is a GET request, or this is a POST but not accepted with errors.
+    return dict(form=form)
+    # if request.method == "GET":
+    #     return dict()
+    # else:
+    #     # This is a form submission.
+    #     print("User: ", get_user_email(), " Product: ", request.params.get("product_name"))
+    #     # Insert product
+    #     db.product.insert(product_name=request.params.get("product_name"))
+    #     redirect(URL('add'))
+    #     # We always redirect after successful form processing.
+
+
+# This endpoint will be used for URLS of the form /edit/k where k is the product id.
+@action('edit/<pet_id:int>', method=["GET", "POST"])
+@action.uses(db, session, auth.user, '../components/edit.html')
+def edit(pet_id=None):
+    assert pet_id is not None
+    # We read the product being edited from the db.
+    p = db.pet[pet_id]
+    if p is None:
+        # Nothing found to be edited
+        redirect(URL('index'))
+    # Edit form: record initialized
+    form = Form(db.pet, record=p, deletable=False, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        # The update already happened
+        redirect(URL('index'))
+    return dict(form=form)
+
