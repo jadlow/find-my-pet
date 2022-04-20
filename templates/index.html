@@ -1,7 +1,10 @@
 [[extend 'layout.html']]
 
-<div class="section">
+<div class="section is-mobile">
     <div class="container">
+        <a class="button" href="[[=URL('add')]]">
+            <span class="icon"><i class="fa fa-fw fa-plus"></i></span> <span>Add</span>
+        </a>
         <table class="table is-striped is-fullwidth">
         <tr>
             <th>Id</th>
@@ -12,6 +15,7 @@
             <th>Lat Long Square</th>
             <th>Latitude</th>
             <th>Longitude</th>
+            <th>User Email</th>
             <th>Creation Date</th>
             <th></th>
         </tr>
@@ -25,13 +29,18 @@
             <td>[[=row.pet_latlng_square]]</td>
             <td>[[=row.pet_lat]]</td>
             <td>[[=row.pet_lng]]</td>
+            <td>[[=row.user_email]]</td>
             <td>[[=row.creation_date]]</td>
             <td>
                 <a class="button" href="[[=URL('edit', row.id)]]">
                     <span class="icon"><i class="fa fa-fw fa-pencil"></i></span> <span>Edit</span>
                 </a>
             </td>
-
+            <td>
+                <a class="button" href="[[=URL('delete', row.id, signer=url_signer)]]">
+                    <span class="icon"><i class="fa fa-fw fa-trash"></i></span>
+                </a>
+            </td>
         </tr>
         [[pass]]
         </table>

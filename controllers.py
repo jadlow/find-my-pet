@@ -36,7 +36,7 @@ url_signer = URLSigner(session)
 
 
 @action('index')
-@action.uses(db, auth, 'index.html')
+@action.uses(db, auth, url_signer, 'index.html')
 def index():
     rows = db(db.pet).select()
     return dict(rows=rows, url_signer=url_signer)
@@ -109,4 +109,11 @@ def edit(pet_id=None):
         # The update already happened
         redirect(URL('index'))
     return dict(form=form)
+
+@action('delete/<pet_id:int>')
+@action.uses(db, session, auth.user, url_signer.verify())
+def delete(pet_id=None):
+    assert pet_id is not None
+    db(db.pet.id == pet_id).delete()
+    redirect(URL('index'))
 

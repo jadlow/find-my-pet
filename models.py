@@ -26,7 +26,7 @@ db.define_table('pet',
                 Field('pet_latlng_square', 'string'),  # This is the ~1KM square.
                 Field('pet_lat', 'double'),
                 Field('pet_lng', 'double'),
-                # Field('created_by', readable=False, writable=False, default=get_user_email), # BROKEN LINE
+                Field('user_email', readable=False, writable=False, default=get_user_email),
                 Field('creation_date', 'datetime', readable=False, writable=False, default=get_time)
                 )
 
