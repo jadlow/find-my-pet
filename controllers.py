@@ -38,14 +38,17 @@ url_signer = URLSigner(session)
 @action('index')
 @action.uses(db, auth, url_signer, 'index.html')
 def index():
-    rows = db(db.pet).select()
-    return dict(rows=rows, url_signer=url_signer)
+    pets = db(db.pet).select()
+    comments = db(db.comment).select()
+    return dict(comments=comments, pets=pets, url_signer=url_signer)
 
 
 @action('main-page')
-@action.uses('../components/main.html')
+@action.uses(db, auth, url_signer, '../components/main.html')
 def serve_main():
-    return dict()
+    pets = db(db.pet.user_email == db.auth_user.email).select()
+    comments = db(db.comment).select()
+    return dict(pets=pets, comments=comments, url_signer=url_signer)
 
 
 @action('about')
@@ -72,6 +75,9 @@ def serve_settings():
     return dict()
 
 
+# PETS
+
+
 @action('add', method=["GET", "POST"])
 @action.uses(db, session, auth.user, '../components/add.html')
 def add():
@@ -82,24 +88,17 @@ def add():
         redirect(URL('index'))
     # Either this is a GET request, or this is a POST but not accepted with errors.
     return dict(form=form)
-    # if request.method == "GET":
-    #     return dict()
-    # else:
-    #     # This is a form submission.
-    #     print("User: ", get_user_email(), " Product: ", request.params.get("product_name"))
-    #     # Insert product
-    #     db.product.insert(product_name=request.params.get("product_name"))
-    #     redirect(URL('add'))
-    #     # We always redirect after successful form processing.
 
 
 # This endpoint will be used for URLS of the form /edit/k where k is the product id.
 @action('edit/<pet_id:int>', method=["GET", "POST"])
-@action.uses(db, session, auth.user, '../components/edit.html')
+@action.uses(db, session, auth.user, url_signer.verify(), '../components/edit.html')
 def edit(pet_id=None):
     assert pet_id is not None
     # We read the product being edited from the db.
     p = db.pet[pet_id]
+    if p.user_email != get_user_email():
+        redirect(URL('index'))
     if p is None:
         # Nothing found to be edited
         redirect(URL('index'))
@@ -110,10 +109,58 @@ def edit(pet_id=None):
         redirect(URL('index'))
     return dict(form=form)
 
+
 @action('delete/<pet_id:int>')
 @action.uses(db, session, auth.user, url_signer.verify())
 def delete(pet_id=None):
     assert pet_id is not None
+    p = db.pet[pet_id]
+    if p.user_email != get_user_email():
+        redirect(URL('index'))
     db(db.pet.id == pet_id).delete()
     redirect(URL('index'))
 
+
+# COMMENTS
+
+
+@action('add_comment', method=["GET", "POST"])
+@action.uses(db, session, auth.user, '../components/add_comment.html')
+def add_comment():
+    # Insert form: no record init
+    form = Form(db.comment, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        # We simply redirect; the insertion already happened
+        redirect(URL('index'))
+    # Either this is a GET request, or this is a POST but not accepted with errors.
+    return dict(form=form)
+
+
+@action('edit_comment/<comment_id:int>', method=["GET", "POST"])
+@action.uses(db, session, auth.user, url_signer.verify(), '../components/edit_comment.html')
+def edit_comment(comment_id=None):
+    assert comment_id is not None
+    # We read the product being edited from the db.
+    p = db.comment[comment_id]
+    if p.user_email != get_user_email():
+        redirect(URL('index'))
+    if p is None:
+        # Nothing found to be edited
+        redirect(URL('index'))
+    # Edit form: record initialized
+    form = Form(db.comment, record=p, deletable=False, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        # The update already happened
+        redirect(URL('index'))
+    return dict(form=form)
+
+
+@action('delete_comment/<comment_id:int>')
+@action.uses(db, session, auth.user, url_signer.verify())
+def delete(comment_id=None):
+    assert comment_id is not None
+    p = db.comment[comment_id]
+    if p.user_email != get_user_email():
+        redirect(URL('index'))
+    db(db.comment.id == comment_id).delete()
+    redirect(URL('index'))

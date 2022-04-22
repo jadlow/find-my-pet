@@ -19,7 +19,6 @@ def get_time():
 
 db.define_table('pet',
                 Field('pet_name', 'string', requires=IS_NOT_EMPTY(), label=T('Pet Name')),
-                Field('auth_user_id', 'reference auth_user'),  # Alternative
                 Field('is_reunited', 'boolean', default=False),
                 Field('description', 'text', requires=IS_NOT_EMPTY(), label=T('Description')),
                 Field('photo', 'text'),  # This contains the image URL, see Unit 18
@@ -30,12 +29,13 @@ db.define_table('pet',
                 Field('creation_date', 'datetime', readable=False, writable=False, default=get_time)
                 )
 
-# db.define_table('comment',
-#                 Field('auth_user_id', 'reference auth_user'),  # Alternative
-#                 Field('pet_id', 'reference pet'),
-#                 Field('post_date', 'datetime', default=get_time)
-#                 )
-#
+db.define_table('comment',
+                Field('user_email', readable=False, writable=False, default=get_user_email),  # Alternative
+                Field('pet_id', 'reference pet'),
+                Field('post_date', 'datetime', default=get_time, readable=False, writable=False),
+                Field('post_text', 'text', requires=IS_NOT_EMPTY()),
+                )
+
 # db.define_table('user',
 #                 Field('auth_user_id', 'reference auth_user'),
 #                 Field('photo', 'text'),  # This contains the image URL, see Unit 18

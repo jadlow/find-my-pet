@@ -19,7 +19,7 @@
             <th>Creation Date</th>
             <th></th>
         </tr>
-        [[for row in rows:]]
+        [[for row in pets:]]
         <tr>
             <td>[[=row.id]]</td>
             <td>[[=row.pet_name]]</td>
@@ -38,6 +38,43 @@
             </td>
             <td>
                 <a class="button" href="[[=URL('delete', row.id, signer=url_signer)]]">
+                    <span class="icon"><i class="fa fa-fw fa-trash"></i></span>
+                </a>
+            </td>
+        </tr>
+        [[pass]]
+        </table>
+    </div>
+
+
+    <!--# COMMENTS-->
+    <div class="container">
+        <a class="button" href="[[=URL('add_comment')]]">
+            <span class="icon"><i class="fa fa-fw fa-plus"></i></span> <span>Add Comment</span>
+        </a>
+        <table class="table is-striped is-fullwidth">
+        <tr>
+            <th>Id</th>
+            <th>User Email</th>
+            <th>Pet ID</th>
+            <th>Post Date</th>
+            <th>Post Text</th>
+            <th></th>
+        </tr>
+        [[for row in comments:]]
+        <tr>
+            <td>[[=row.id]]</td>
+            <td>[[=row.user_email]]</td>
+            <td>[[=row.pet_id]]</td>
+            <td>[[=row.post_date]]</td>
+            <td>[[=row.post_text]]</td>
+            <td>
+                <a class="button" href="[[=URL('edit_comment', row.id)]]">
+                    <span class="icon"><i class="fa fa-fw fa-pencil"></i></span> <span>Edit</span>
+                </a>
+            </td>
+            <td>
+                <a class="button" href="[[=URL('delete_comment', row.id, signer=url_signer)]]">
                     <span class="icon"><i class="fa fa-fw fa-trash"></i></span>
                 </a>
             </td>

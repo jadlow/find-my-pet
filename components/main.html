@@ -35,36 +35,48 @@
             </div>
         </div>
         <div class="column">
+            [[for row in pets:]]
             <div class="box">
                 <div class="columns block is-mobile">
-                    <div class="column">
-                    <img src="../static/images/LostDog.jpg">
+                    <div class="column card-image">
+                        <div class="card-image">
+                            <img src="../static/images/LostDog.jpg">
+                        </div>
                     </div>
 
                     <div class="column">
                         <div class="container">
-                            <h1 class="title">DoggoMcDoggo</h1>
+                            <h1 class="title">[[=row.pet.pet_name]]</h1>
                             <div class="columns block is-mobile">
                                 <div class="column">
-                                <h2 class="subtitle">Lost @Location</h2>
+                                <h2 class="subtitle"><span class="icon"><i class="fa fa-fw fa-map-marker"></i></span>[[=row.pet.pet_latlng_square]]</h2>
                                 </div>
                                 <div class="column">
-                                <h2 class="subtitle">User @User</h2>
+                                    <p class="title">[[=row.auth_user.first_name]] [[=row.auth_user.last_name]]</p>
+                                    <p class="subtitle is-6">[[=row.pet.user_email]]</p>
                                 </div>
                             </div>
                         </div>
-                        
+                        <h6 class="subtitle">Description</h6>
                         <div class="content">
-                            <h6><br>Description</h6>
-                            <ul>
-                                <li>10-20 lbs</li>
-                                <li>golden retriever</li>
-                                <li>1 year old</li>
-                            </ul>
+                                [[=row.pet.description]]
                         </div>
                     </div>
                 </div>
+                [[for comment in comments:]]
+                    <div class="box">
+                        <div class="container">
+                            <h1>Pet: [[=comment.pet_id]]</h1>
+                            <h2>Post Date: [[=comment.post_date]]</h2>
+                            <div class="content">
+                                [[=comment.post_text]]
+                            </div>
+                        </div>
+                    </div>
+                [[pass]]
             </div>
+            [[pass]]
+
             <div class="box">
                 <div class="columns block is-mobile">
                     <div class="column">
