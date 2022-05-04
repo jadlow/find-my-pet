@@ -9,17 +9,32 @@
     <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.css">
     [[block page_head]]<!-- individual pages can customize header here -->[[end]]
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Cabin&display=swap');
+		.top-name{
+			background-color: #1e90ff;
+			border-bottom: 10px solid #00aa00;
+			color: #ffffff;
+			font-family: Cabin, "sans-serif";
+			font-size: 48pt;
+			padding: 5px 0 0 0;
+			text-align: center;
+		}
+		
+		.top-name img{
+			height: 90px;
+			vertical-align: -24px;
+		}
+	</style>
   </head>
   <body>
     <!-- Navigation bar -->
-    <nav class="navbar is-transparent" role="navigation" aria-label="main navigation">
+	<div class="top-name">
+		<img src="../static/images/logo-transparent.png" alt="Logo"> &nbsp;
+		Find My Pet
+	</div>
+    <nav class="navbar is-transparent is-dark" role="navigation" aria-label="main navigation" style="background: #505050; font-size: 14pt;">
       <div class="navbar-brand">
-          <a href="[[=URL('main-page')]]">
-              <img src="../static/images/pet.png" alt="Logo">
-          </a>
-          <a class="navbar-item" href="[[=URL('main-page')]]">
-              Find My Pet
-          </a>
           <a class="navbar-item" href="[[=URL('about')]]">
             About Us
           </a>
@@ -70,7 +85,7 @@
                 </div>
               [[else:]]
                 <a class="button is-link" href="[[=URL('auth/register')]]">Sign up</a>
-                <a class="button is-success" href="[[=URL('auth/login')]]">Log in</a>
+                <a class="button is-danger" href="[[=URL('auth/login')]]">Log in</a>
               [[pass]]
             </div>
           </div>
