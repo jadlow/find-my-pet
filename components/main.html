@@ -6,7 +6,8 @@
             <div class="box">
             <h1 class="title">Search Parameters</h1>
             <label class="label">Radius</label>
-            <input class="slider is-fullwidth" step="1" min="0" max="100" value="50" type="range">
+            <input id="distRangeSlider" class="slider is-fullwidth" min="0.5" max="20.0" value="10.0" step="0.5" type="range" onchange="changeDistRangeDisplay(this.value);">
+            <br><span id="distRangeDisplay">10</span> mi
             <label class="label">Set Location</label>
             <label class="label">Lost/Found</label>
                 <label class="checkbox">
