@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.css">
     [[block page_head]]<!-- individual pages can customize header here -->[[end]]
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+    
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Cabin&display=swap');
 		.top-name{
@@ -25,6 +26,14 @@
 			height: 90px;
 			vertical-align: -24px;
 		}
+		
+		.top-name a:link{
+			color: #ffffff;
+		}
+		
+		.top-name a:hover, .top-name a:active{
+			color: #000000;
+		}
 	</style>
   </head>
   <body>
@@ -33,7 +42,7 @@
 		<a href="[[=URL('main-page')]]"><img src="../static/images/logo-transparent.png" alt="Logo"></a>
 		<a href="[[=URL('main-page')]]">Find My Pet</a>
 	</div>
-    <nav class="navbar is-transparent is-dark" role="navigation" aria-label="main navigation" style="background: #505050; font-size: 14pt;">
+    <nav class="navbar is-transparent is-dark" role="navigation" aria-label="main navigation" style="background: #dE8A3D; font-size: 14pt;">
       <div class="navbar-brand">
           <a class="navbar-item" href="[[=URL('about')]]">
             About Us
@@ -107,5 +116,6 @@
   <script src="js/axios.min.js"></script>
   <script src="js/vue.js"></script>
   <script src="js/utils.js"></script>
+  <script src="js/mainjs.js"></script>
   [[block page_scripts]]<!-- individual pages can add scripts here -->[[end]]
 </html>
