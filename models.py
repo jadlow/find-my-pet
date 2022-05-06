@@ -31,10 +31,12 @@ db.define_table('pet',
 
 db.define_table('comment',
                 Field('user_email', readable=False, writable=False, default=get_user_email),  # Alternative
-                Field('pet_id', 'reference pet'),
+                Field('pet_id', 'reference pet', readable=False, writable=False,),
                 Field('post_date', 'datetime', default=get_time, readable=False, writable=False),
                 Field('post_text', 'text', requires=IS_NOT_EMPTY()),
                 )
+
+db.comment.id.readable = db.comment.id.writable = False
 
 # db.define_table('user',
 #                 Field('auth_user_id', 'reference auth_user'),

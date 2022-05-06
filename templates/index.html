@@ -32,7 +32,7 @@
             <td>[[=row.user_email]]</td>
             <td>[[=row.creation_date]]</td>
             <td>
-                <a class="button" href="[[=URL('edit', row.id)]]">
+                <a class="button" href="[[=URL('edit', row.id, signer=url_signer)]]">
                     <span class="icon"><i class="fa fa-fw fa-pencil"></i></span> <span>Edit</span>
                 </a>
             </td>
@@ -69,7 +69,7 @@
             <td>[[=row.post_date]]</td>
             <td>[[=row.post_text]]</td>
             <td>
-                <a class="button" href="[[=URL('edit_comment', row.id)]]">
+                <a class="button" href="[[=URL('edit_comment', row.id, signer=url_signer)]]">
                     <span class="icon"><i class="fa fa-fw fa-pencil"></i></span> <span>Edit</span>
                 </a>
             </td>

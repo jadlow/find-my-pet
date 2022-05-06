@@ -25,11 +25,11 @@ session, db, T, auth, and tempates are examples of Fixtures.
 Warning: Fixtures MUST be declared with @action.uses({fixtures}) else your app will result in undefined behavior
 """
 
-from py4web import action, request, abort, redirect, URL
+from py4web import action, request, abort, redirect, URL, Field
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
-from .models import get_user_email
+from .models import get_user_email, get_time
 from py4web.utils.form import Form, FormStyleBulma
 
 url_signer = URLSigner(session)
@@ -124,15 +124,27 @@ def delete(pet_id=None):
 # COMMENTS
 
 
-@action('add_comment', method=["GET", "POST"])
+@action('add_comment/<pet_id:int>', method=["GET", "POST"])
 @action.uses(db, session, auth.user, '../components/add_comment.html')
-def add_comment():
-    # Insert form: no record init
-    form = Form(db.comment, csrf_session=session, formstyle=FormStyleBulma)
+def add_comment(pet_id=None):
+    assert pet_id is not None
+    form = Form([Field('post_text', 'text')], csrf_session=session,
+                formstyle=FormStyleBulma)
     if form.accepted:
-        # We simply redirect; the insertion already happened
-        redirect(URL('index'))
-    # Either this is a GET request, or this is a POST but not accepted with errors.
+        pet = db(db.pet.id == pet_id).select().first()
+        db.comment.insert(
+            user_email=get_user_email(),
+            pet_id=pet_id,
+            post_date=get_time(),
+            post_text=form.vars["post_text"],
+        )
+        redirect(URL('main-page'))
+    # # Insert form: no record init
+    # form = Form(db.comment, csrf_session=session, formstyle=FormStyleBulma)
+    # if form.accepted:
+    #     # We simply redirect; the insertion already happened
+    #     redirect(URL('index'))
+    # # Either this is a GET request, or this is a POST but not accepted with errors.
     return dict(form=form)
 
 
@@ -151,7 +163,7 @@ def edit_comment(comment_id=None):
     form = Form(db.comment, record=p, deletable=False, csrf_session=session, formstyle=FormStyleBulma)
     if form.accepted:
         # The update already happened
-        redirect(URL('index'))
+        redirect(URL('main-page'))
     return dict(form=form)
 
 
@@ -163,4 +175,4 @@ def delete(comment_id=None):
     if p.user_email != get_user_email():
         redirect(URL('index'))
     db(db.comment.id == comment_id).delete()
-    redirect(URL('index'))
+    redirect(URL('main-page'))
