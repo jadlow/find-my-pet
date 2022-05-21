@@ -40,15 +40,71 @@ url_signer = URLSigner(session)
 def index():
     pets = db(db.pet).select()
     comments = db(db.comment).select()
-    return dict(comments=comments, pets=pets, url_signer=url_signer)
+    return dict(
+        comments=comments,
+        pets=pets, url_signer=url_signer
+    )
 
 
 @action('main-page')
-@action.uses(db, auth, url_signer, '../components/main.html')
+@action.uses('../components/main.html', db, auth, url_signer)
 def serve_main():
     pets = db(db.pet.user_email == db.auth_user.email).select()
     comments = db(db.comment).select()
-    return dict(pets=pets, comments=comments, url_signer=url_signer)
+    return dict(
+        load_posts_url=URL('load_posts', signer=url_signer),
+        load_comments_url=URL('load_comments', signer=url_signer),
+        add_comment_url=URL('add_comment', signer=url_signer),
+        delete_comment_url=URL('delete_comment', signer=url_signer),
+        current_user_email=get_user_email(),
+        pets=pets,
+        comments=comments,
+        url_signer=url_signer
+    )
+
+
+# Main API Functions
+@action('load_posts')
+@action.uses(url_signer.verify(), db)
+def load_posts():
+    pets = db(db.pet.user_email == db.auth_user.email).select(orderby=~db.pet.creation_date).as_list()
+    return dict(pets=pets)
+
+
+@action('load_comments')
+@action.uses(url_signer.verify(), db)
+def load_comments():
+    comments = db(db.comment).select()
+    return dict(comments=comments)
+
+
+@action('add_comment', method="POST")
+@action.uses(url_signer.verify(), db)
+def add_comment():
+    if get_user_email() is None:
+        redirect(URL('auth', 'login'))
+    author_email = get_user_email()
+    author_first_name = db(db.auth_user.email == get_user_email()).select().first().first_name
+    author_last_name = db(db.auth_user.email == get_user_email()).select().first().last_name
+    id = db.comment.insert(
+        user_email=author_email,
+        pet_id=request.json.get('pet_id'),
+        post_text=request.json.get('comment_content'),
+    )
+    return dict(
+        id=id,
+        user_email=author_email,
+        author_first_name=author_first_name,
+        author_last_name=author_last_name
+    )
+
+@action('delete_comment')
+@action.uses(url_signer.verify(), db)
+def delete_comment():
+    id = request.params.get('comment_id')
+    assert id is not None
+    db(db.comment.id == id).delete()
+    return "ok"
 
 
 @action('about')
