@@ -21,6 +21,11 @@
             </div>
             {{new_radius}} miles
          </div>
+         <div class="field">
+            <label class="label">Lost or Found</label>
+            <input type="radio" name="lorf" v-model="search_lorf" value="lost" checked> Lost
+            <input type="radio" name="lorf" v-model="search_lorf" value="found"> Found
+         </div>
          <button class="button is-link" @click="load_pins();">Load locations</button>
       </div>
       <div class="column">
