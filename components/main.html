@@ -67,6 +67,15 @@
                     <!--Display Pets Section-->
                     <div class="box">
                         <div class="block is-mobile">
+
+                            <!--Maximize and minimize functionality-->
+                            <div v-if="row.show_details == false" @click="show_details(row._idx, true)">
+                                <i class="fa fa-window-maximize has-text-info has-text-right"></i>
+                            </div>
+                            <div v-if="row.show_details == true" @click="show_details(row._idx, false)">
+                                <i class="fa fa-window-minimize has-text-info has-text-right"></i>
+                            </div>
+
                             <div class="card-image">
                                 <img src="../static/images/LostDog.jpg">
                             </div>
@@ -77,27 +86,44 @@
                                 </span>
                                 {{ row.pet.pet_latlng_square }}
                             </div>
-                            <div class="content">
+                            <div v-if="row.show_details == true" class="content">
                                 {{ row.pet.description }}
                             </div>
                         </div>
 
                         <!--Display Comments Section-->
-                        <div class="block" v-for="comment in comments">
+                        <div class="block" v-if="row.show_details == true" v-for="comment in comments">
                             <div v-if="comment.pet_id == row.pet.id">
                                 <div class="box">
                                     <div class="columns container">
                                         <div class="column">
-                                            {{ comment.post_text }}<br>
+                                            <div v-if="comment.user_email == '[[=current_user_email]]'">
+                                                <div class="control" :class="{'is-loading': comment._state === 'pending'}">
+                                                    <input type="text" class="input" v-model="comment.post_text"
+                                                            :class="{
+                                                                'is-focused': comment._state === 'edit',
+                                                                'is-static': comment._state === 'clean',
+                                                            }"
+                                                           :readonly="comment._state === 'clean'"
+                                                           @click="start_edit(comment._idx)"
+                                                           @blur="stop_edit(comment._idx)"
+                                                    >
+                                                </div>
+                                            </div>
+                                            <div v-if="comment.user_email != '[[=current_user_email]]'">
+                                                {{ comment.post_text }}
+                                            </div>
+                                            <br>
                                             <span class="is-size-7 has-text-grey">
                                                 {{ comment.post_date }}
                                             </span>
                                         </div>
                                         <div class="column has-text-right">
                                             {{ comment.user_email }}
-                                            <div v-if="comment.user_email == '[[=current_user_email]]'" @click="delete_comment(comment._idx)">
+                                            <br>
+                                            <span v-if="comment.user_email == '[[=current_user_email]]'" @click="delete_comment(comment._idx)">
                                                 <i class="fa fa-trash has-text-danger"></i>
-                                            </div>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -105,7 +131,7 @@
                         </div>
 
                         <!--Display Comment Input-->
-                        <div class="form columns">
+                        <div v-if="row.show_details == true" class="form columns">
                           <div class="field">
                             <div class="control column">
                               <input type="text" v-model="row.add_comment_content" class="input" placeholder="add comment...">
@@ -216,6 +242,7 @@
   let load_comments_url = "[[=XML(load_comments_url)]]";
   let add_comment_url = "[[=XML(add_comment_url)]]";
   let delete_comment_url = "[[=XML(delete_comment_url)]]";
+  let edit_comment_url = "[[=XML(edit_comment_url)]]";
 </script>
 <script src="js/index.js"></script>
 [[end]]

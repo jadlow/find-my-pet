@@ -25,6 +25,8 @@ session, db, T, auth, and tempates are examples of Fixtures.
 Warning: Fixtures MUST be declared with @action.uses({fixtures}) else your app will result in undefined behavior
 """
 
+import time
+
 from py4web import action, request, abort, redirect, URL, Field
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
@@ -56,6 +58,7 @@ def serve_main():
         load_comments_url=URL('load_comments', signer=url_signer),
         add_comment_url=URL('add_comment', signer=url_signer),
         delete_comment_url=URL('delete_comment', signer=url_signer),
+        edit_comment_url=URL('edit_comment', signer=url_signer),
         current_user_email=get_user_email(),
         pets=pets,
         comments=comments,
@@ -84,6 +87,7 @@ def add_comment():
     if get_user_email() is None:
         redirect(URL('auth', 'login'))
     author_email = get_user_email()
+    post_date = get_time()
     author_first_name = db(db.auth_user.email == get_user_email()).select().first().first_name
     author_last_name = db(db.auth_user.email == get_user_email()).select().first().last_name
     id = db.comment.insert(
@@ -95,8 +99,10 @@ def add_comment():
         id=id,
         user_email=author_email,
         author_first_name=author_first_name,
-        author_last_name=author_last_name
+        author_last_name=author_last_name,
+        post_date=post_date,
     )
+
 
 @action('delete_comment')
 @action.uses(url_signer.verify(), db)
@@ -104,6 +110,16 @@ def delete_comment():
     id = request.params.get('comment_id')
     assert id is not None
     db(db.comment.id == id).delete()
+    return "ok"
+
+
+@action('edit_comment', method="POST")
+@action.uses(url_signer.verify(), db)
+def edit_comment():
+    id = request.json.get('id')
+    value = request.json.get('value')
+    db(db.comment.id == id).update(**{'post_text': value})
+    time.sleep(1) # debugging
     return "ok"
 
 

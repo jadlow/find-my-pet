@@ -2,7 +2,6 @@
 // and be used to initialize it.
 let app = {};
 
-
 // Given an empty app object, initializes it filling its attributes,
 // creates a Vue instance, and then initializes the Vue instance.
 let init = (app) => {
@@ -23,6 +22,17 @@ let init = (app) => {
 
     app.complete = (a) => {
         a.map((e) => {e.add_comment_content= "";});
+        a.map((e) => {e.show_details = false;});
+    };
+
+    // This decorates the comments
+    // adding information on their state
+    // - clean: read-only, the value is saved on the server
+    // - edit: the value is being edited
+    // - pending: a save is pending
+    app.decorate = (a) => {
+        a.map((e) => {e._state = 'clean';});
+        return a;
     };
 
     app.add_comment = function (pet_idx) {
@@ -37,6 +47,8 @@ let init = (app) => {
                     pet_id: row.pet.id,
                     id: response.data.id,
                     post_text: row.add_comment_content,
+                    post_date: response.data.post_date,
+                    _status: 'clean',
                 });
                 app.enumerate(app.vue.comments);
                 app.reset_form(pet_idx);
@@ -58,6 +70,33 @@ let init = (app) => {
         });
     };
 
+    app.show_details = function (pet_idx, details_status) {
+        let pet = app.vue.pets[pet_idx];
+        pet.show_details = details_status;
+    };
+
+    app.start_edit = function (comment_idx) {
+        let comment = app.vue.comments[comment_idx];
+        comment._state = 'edit';
+    };
+
+    app.stop_edit = function (comment_idx) {
+        let comment = app.vue.comments[comment_idx];
+        if (comment._state === 'edit') {
+            comment._state = 'pending';
+            axios.post(edit_comment_url,
+                {
+                    id: comment.id,
+                    value: comment.post_text,
+                })
+                .then(function (result) {
+                    comment._state = 'clean';
+                });
+        }
+        // If I was not editing, there is nothing that needs saving
+
+    };
+
     app.reset_form = function (pet_idx) {
         let pet = app.vue.pets[pet_idx];
         pet.add_comment_content = "";
@@ -69,6 +108,9 @@ let init = (app) => {
         // Complete as you see fit.
         add_comment: app.add_comment,
         delete_comment: app.delete_comment,
+        show_details: app.show_details,
+        start_edit: app.start_edit,
+        stop_edit: app.stop_edit,
     };
 
     // This creates the Vue instance.
@@ -92,7 +134,7 @@ let init = (app) => {
         axios.get(load_comments_url)
             .then(function (response) {
                 let comments = response.data.comments;
-                app.enumerate(comments);
+                app.decorate(app.enumerate(comments));
                 app.vue.comments= comments;
             });
     };
