@@ -134,12 +134,20 @@ def serve_about():
 def serve_howto():
     return dict()
 
-
-@action('map')
-@action.uses('../components/map.html')
+# Map page load controller, done by Chen W.
+@action("map")
+@action.uses("../components/map.html", url_signer)
 def serve_map():
-    return dict()
+    return dict(
+        load_pins_url=URL('load_pins', signer=url_signer),
+        url_signer=url_signer
+    )
 
+# Map load pins controller, done by Chen W.
+@action("load_pins")
+@action.uses(db)
+def map_load_pins():
+    return dict()
 
 @action('settings')
 @action.uses('../components/settings.html')
