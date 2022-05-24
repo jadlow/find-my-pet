@@ -48,7 +48,7 @@ let init = (app) => {
                     id: response.data.id,
                     post_text: row.add_comment_content,
                     post_date: response.data.post_date,
-                    _status: 'clean',
+                    _state: 'clean',
                 });
                 app.enumerate(app.vue.comments);
                 app.reset_form(pet_idx);

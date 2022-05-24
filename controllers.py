@@ -25,7 +25,6 @@ session, db, T, auth, and tempates are examples of Fixtures.
 Warning: Fixtures MUST be declared with @action.uses({fixtures}) else your app will result in undefined behavior
 """
 
-import time
 import datetime
 from py4web import action, request, abort, redirect, URL, Field
 from yatl.helpers import A
@@ -119,7 +118,6 @@ def edit_comment():
     id = request.json.get('id')
     value = request.json.get('value')
     db(db.comment.id == id).update(**{'post_text': value})
-    time.sleep(1) # debugging
     return "ok"
 
 
