@@ -12,7 +12,7 @@ let init = (app) => {
         // Complete as you see fit.
         post_success: false,
         new_pet_name: "",
-        new_pet_type: "",
+        new_pet_type: "Dog",
         new_pet_lostfound_date_m: -1,
         new_pet_lostfound_date_d: -1,
         new_pet_lostfound_date_y: -1,
@@ -49,8 +49,8 @@ let init = (app) => {
             app.vue.err_name = true;
             return -1;
         }
-        if(app.vue.new_pet_type.replace(/\s/g, "").length == 0){
-            app.vue.err_type_i = "empty pet type. Please specify a pet type that contains 1 or more characters."
+        if(!["Dog", "Cat", "Bird", "Rodent", "Reptile", "Rabbit", "Pet Livestock", "Aquatic", "Other"].includes(app.vue.new_pet_type)){
+            app.vue.err_type_i = "invalid pet type. Please select a pet type from the given options."
             app.vue.err_type = true;
             return -1;
         }
