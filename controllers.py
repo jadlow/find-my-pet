@@ -26,7 +26,7 @@ Warning: Fixtures MUST be declared with @action.uses({fixtures}) else your app w
 """
 
 import time
-
+import datetime
 from py4web import action, request, abort, redirect, URL, Field
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
@@ -157,18 +157,37 @@ def serve_settings():
 
 # PETS
 
+# Add a pet page load controller, done by Chen W.
+@action("add")
+@action.uses(db, session, auth.user, "../components/add.html", url_signer)
+def serve_add():
+    return dict(
+        add_post_url=URL("add_post", signer=url_signer),
+        url_signer=url_signer
+    )
 
-@action('add', method=["GET", "POST"])
-@action.uses(db, session, auth.user, '../components/add.html')
-def add():
-    # Insert form: no record init
-    form = Form(db.pet, csrf_session=session, formstyle=FormStyleBulma)
-    if form.accepted:
-        # We simply redirect; the insertion already happened
-        redirect(URL('index'))
-    # Either this is a GET request, or this is a POST but not accepted with errors.
-    return dict(form=form)
+# Add a pet post controller, done by Chen W.
+@action("add_post", method=["GET", "POST"])
+@action.uses(db, session, auth.user, url_signer.verify())
+def add_post():
+    db.pet.insert(
+        pet_name = request.json.get("new_pet_name"),
+        pet_type = request.json.get("new_pet_type"),
+        pet_lostfound_date = datetime.datetime(request.json.get("new_pet_lostfound_date_y"), request.json.get("new_pet_lostfound_date_m"), request.json.get("new_pet_lostfound_date_d")),
+        description = request.json.get("new_pet_description"),
+        pet_lat = request.json.get("new_pet_lat"),
+        pet_lng = request.json.get("new_pet_lng")
+    )
+    return dict()
 
+"""
+# Add a pet post success page load controller, done by Chen W.
+@action("add_success")
+@action.uses("../components/add_success.html", url_signer)
+def add_success_serve():
+    print("naqui @ 187 @ add_success")
+    return dict(url_signer = url_signer)
+"""
 
 # This endpoint will be used for URLS of the form /edit/k where k is the product id.
 @action('edit/<pet_id:int>', method=["GET", "POST"])

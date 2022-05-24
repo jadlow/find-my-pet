@@ -25,18 +25,16 @@ let init = (app) => {
     };
 
     app.load_pins = function(){
-        console.log("load_pins function called in vue");
         app.vue.coord_inv = false;
         new_coord_cleaned = app.vue.new_coord.replace(/\s/g, "");
         const new_coord_split = new_coord_cleaned.split(",");
-        console.log("new_coord_split @ load_pins = ", new_coord_split);
         if(new_coord_split.length != 2){
             app.vue.error_message = "coordinate length incorrect. Please specify a number for the latitude and longitude, separated by a comma.";
             app.vue.coord_inv = true;
             return -1;
         }
-        new_lat = new_coord_split[0];
-        new_lon = new_coord_split[1];
+        let new_lat = new_coord_split[0];
+        let new_lon = new_coord_split[1];
         if(isNaN(new_lat)){
             app.vue.error_message = "latitude not a number. Please specify a number for the latitude.";
             app.vue.coord_inv = true;

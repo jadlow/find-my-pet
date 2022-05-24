@@ -19,12 +19,14 @@ def get_time():
 
 db.define_table('pet',
                 Field('pet_name', 'string', requires=IS_NOT_EMPTY(), label=T('Pet Name')),
+                Field('pet_type', 'string', requires=IS_NOT_EMPTY()),
+                Field('pet_lostfound_date', 'date', requires=IS_NOT_EMPTY()),
                 Field('is_reunited', 'boolean', default=False),
                 Field('description', 'text', requires=IS_NOT_EMPTY(), label=T('Description')),
                 Field('photo', 'text'),  # This contains the image URL, see Unit 18
                 Field('pet_latlng_square', 'string'),  # This is the ~1KM square.
-                Field('pet_lat', 'double'),
-                Field('pet_lng', 'double'),
+                Field('pet_lat', 'double', requires=IS_NOT_EMPTY()),
+                Field('pet_lng', 'double', requires=IS_NOT_EMPTY()),
                 Field('user_email', readable=False, writable=False, default=get_user_email),
                 Field('creation_date', 'datetime', readable=False, writable=False, default=get_time)
                 )

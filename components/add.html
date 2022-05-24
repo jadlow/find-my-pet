@@ -1,6 +1,71 @@
 [[extend 'layout.html']]
 
-<div class="section">
+<div class="section" id="vue-target-newpost">
     <h1 class="title">Create a Lost/Found Pet Post</h1>
-    [[=form]]
+    <div v-if="!post_success">
+        <div class="field">
+            <label class="label">Name (required)</label>
+            <div class="control">
+                <input type="text" class="input is-info" v-model="new_pet_name" required>
+            </div>
+            <div class="has-text-danger" v-if="err_name">
+                Error {{err_name_i}}
+            </div>            
+        </div>
+        <div class="field">
+            <label class="label">Pet type (required)</label>
+            <div class="control">
+                <input type="text" class="input is-info" v-model="new_pet_type" list="new_pet_type-list" required>
+                <datalist id="new_pet_type-list">
+                    <option>Dog</option>
+                    <option>Cat</option>
+                    <option>Bunny</option>
+                    <option>Bird</option>
+                </datalist>
+            </div>
+            <div class="has-text-danger" v-if="err_type">
+                Error {{err_type_i}}
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Lost/Found Date (required)</label>
+            <div class="control">
+                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_m" min="1" max="12" placeholder="MM" style="width: 80px;" required>&ensp;/
+                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_d" min="1" max="31" placeholder="DD" style="width: 80px;" required>&ensp;/
+                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_y" min="2017" max="2022" placeholder="YYYY" style="width: 120px;" required>
+            </div>
+            <div class="has-text-danger" v-if="err_date">
+                Error {{err_date_i}}
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+                <textarea class="textarea is-info" v-model="new_description" >
+                </textarea>
+            </div>
+            <div class="has-text-danger" v-if="err_description">
+                Error {{err_description_i}}
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Lost/Found Location Coordinates (required)</label>
+            <div class="control">
+                <input type="text" class="input is-info" v-model="new_pet_lat_lng" required>
+            </div>
+            <div class="has-text-danger" v-if="err_coord">
+                Error {{err_coord_i}}
+            </div>
+        </div>
+        <button class="button is-info" @click="add_post()">Add Post</button>
+    </div>
+    <div v-if="post_success" class="notification is-success is-size-5">
+        Success! The posting has been accepted.
+    </div>
 </div>
+[[block page_scripts]]
+<script src="js/add_pet.js"></script>
+<script>
+   let add_post_url = "[[=XML(add_post_url)]]";
+</script>
+[[end]]
