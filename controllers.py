@@ -171,6 +171,7 @@ def add_post():
     db.pet.insert(
         pet_name = request.json.get("new_pet_name"),
         pet_type = request.json.get("new_pet_type"),
+        pet_lost = request.json.get("new_pet_lost"),
         pet_lostfound_date = datetime.datetime(request.json.get("new_pet_lostfound_date_y"), request.json.get("new_pet_lostfound_date_m"), request.json.get("new_pet_lostfound_date_d")),
         description = request.json.get("new_pet_description"),
         pet_lat = request.json.get("new_pet_lat"),
