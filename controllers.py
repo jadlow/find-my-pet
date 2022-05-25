@@ -37,7 +37,7 @@ url_signer = URLSigner(session)
 
 
 @action('index')
-@action.uses(db, auth, url_signer, 'index.html')
+@action.uses('index.html', db, auth, url_signer)
 def index():
     pets = db(db.pet).select()
     comments = db(db.comment).select()
@@ -148,9 +148,13 @@ def map_load_pins():
     return dict()
 
 @action('settings')
-@action.uses('../components/settings.html')
+@action.uses(db, session, auth.user, '../components/settings.html')
 def serve_settings():
-    return dict()
+    form = Form(db.user, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        redirect(URL('../components/settings.html'))
+
+    return dict(form=form)
 
 
 # PETS
