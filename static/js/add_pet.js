@@ -16,12 +16,16 @@ let init = (app) => {
         new_pet_lostfound_date_m: -1,
         new_pet_lostfound_date_d: -1,
         new_pet_lostfound_date_y: -1,
+        new_pet_lost: "true",
         new_description: "",
         new_pet_lat_lng: "",
         err_name: false,
         err_name_i: "",
         err_type: false,
         err_type_i: "",
+        err_lost: false,
+        err_lost_i: "",
+        war_lost: "",
         err_date: false,
         err_date_i: "",
         err_description: false,
@@ -41,19 +45,37 @@ let init = (app) => {
     app.new_post = function(){
         app.vue.err_name = false;
         app.vue.err_type = false;
+        app.vue.err_lost = false;
         app.vue.err_date = false;
         app.vue.err_description = false;
         app.vue.err_coord = false;
+        
+        // Check name.
         if(app.vue.new_pet_name.replace(/\s/g, "").length == 0){
             app.vue.err_name_i = "empty pet name. Please specify a pet name that contains 1 or more characters."
             app.vue.err_name = true;
             return -1;
         }
+
+        // Check type.
         if(!["Dog", "Cat", "Bird", "Rodent", "Reptile", "Rabbit", "Pet Livestock", "Aquatic", "Other"].includes(app.vue.new_pet_type)){
             app.vue.err_type_i = "invalid pet type. Please select a pet type from the given options."
             app.vue.err_type = true;
             return -1;
         }
+
+        // Check lost.
+        if(!["true", "false"].includes(app.vue.new_pet_lost)){
+            app.vue.err_lost_i = "invalid pet lost or found value. Please select whether the pet was lost or found.";
+            app.vue.err_lost = true;
+            return -1;
+        }
+        let new_pet_lost_bool = true;
+        if(app.vue.new_pet_lost == "false"){
+            new_pet_lost_bool = false;
+        }
+
+        // Check date.
         if(isNaN(app.vue.new_pet_lostfound_date_m) || (app.vue.new_pet_lostfound_date_m.length == 0)){
             app.vue.err_date_i = "month is not a number. Please specify a month with a number.";
             app.vue.err_date = true;
@@ -77,8 +99,8 @@ let init = (app) => {
             return -1;
         }
         app.vue.new_pet_lostfound_date_y = parseInt(app.vue.new_pet_lostfound_date_y);
-        if((app.vue.new_pet_lostfound_date_y < 2017) || (app.vue.new_pet_lostfound_date_y > 2022)){
-            app.vue.err_date_i = "year not in range. Please specify a year with a number between 2017 to 2022.";
+        if((app.vue.new_pet_lostfound_date_y < 2012) || (app.vue.new_pet_lostfound_date_y > 2022)){
+            app.vue.err_date_i = "year not in range. Please specify a year with a number between 2012 to 2022.";
             app.vue.err_date = true;
             return -1;
         }
@@ -96,7 +118,7 @@ let init = (app) => {
         const today_date = new Date();
         const in_date = new Date(app.vue.new_pet_lostfound_date_y, app.vue.new_pet_lostfound_date_m - 1, app.vue.new_pet_lostfound_date_d);
         if(in_date.getTime() > today_date.getTime()){
-            app.vue.err_date_i = "date is in the future. Please specify a date between January 1, 2017 to today.";
+            app.vue.err_date_i = "date is in the future. Please specify a date between January 1, 2012 to today.";
             app.vue.err_date = true;
             return -1;
         }
@@ -105,11 +127,15 @@ let init = (app) => {
             app.vue.err_date = true;
             return -1;
         }
+
+        // Check description.
         if(app.vue.new_description.replace(/\s/g, "").length == 0){
             app.vue.err_description_i = "description is empty. Please provide a description about your pet.";
             app.vue.err_description = true;
             return -1;
         }
+
+        // Check coordinates.
         const new_pet_lat_lng_cleaned = app.vue.new_pet_lat_lng.replace(/\s/g, "");
         new_pet_lat_lng_split = new_pet_lat_lng_cleaned.split(",");
         if(new_pet_lat_lng_split.length != 2){
@@ -145,10 +171,13 @@ let init = (app) => {
             app.vue.err_coord = true;
             return -1;
         }
+
+        // Everything alright, add entry.
         axios.post(add_post_url,
             {
                 new_pet_name: app.vue.new_pet_name,
                 new_pet_type: app.vue.new_pet_type,
+                new_pet_lost: new_pet_lost_bool,
                 new_pet_lostfound_date_m: app.vue.new_pet_lostfound_date_m,
                 new_pet_lostfound_date_d: app.vue.new_pet_lostfound_date_d,
                 new_pet_lostfound_date_y: app.vue.new_pet_lostfound_date_y,

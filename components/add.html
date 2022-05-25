@@ -4,7 +4,7 @@
     <h1 class="title">Create a Lost/Found Pet Post</h1>
     <div v-if="!post_success">
         <div class="field">
-            <label class="label">Name (required)</label>
+            <label class="label">Name (required, if you do not know the name especially in the case you found the pet, please input "Don't Know")</label>
             <div class="control">
                 <input type="text" class="input is-info" v-model="new_pet_name" required>
             </div>
@@ -28,16 +28,27 @@
                         <option>Other</option>
                     </select>
                 </div>
-                <!--<input type="text" class="input is-info" v-model="new_pet_type" list="new_pet_type-list" required>
-                <datalist id="new_pet_type-list">
-                    <option>Dog</option>
-                    <option>Cat</option>
-                    <option>Bunny</option>
-                    <option>Bird</option>
-                </datalist>-->
             </div>
             <div class="has-text-danger" v-if="err_type">
                 Error {{err_type_i}}
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Pet Lost/Found (required)</label>
+            <div class="control is-size-5">
+                <input type="radio" name="lorf" v-model="new_pet_lost" value="true"> Lost&ensp;
+                <input type="radio" name="lorf" v-model="new_pet_lost" value="false"> Found
+            </div>
+            <div class="has-text-danger" v-if="err_lost">
+                Error {{err_lost_i}}
+            </div>
+            <div class="has-text-grey">
+                <span v-if="new_pet_lost == 'true'">
+                    If your pet has been lost, please search on this site to see whether or not someone else has found them.
+                </span>
+                <span v-if="new_pet_lost == 'false'">
+                    If you have found a lost pet, please search on this site to see whether or not someone has posted they had lost the pet.
+                </span>
             </div>
         </div>
         <div class="field">
@@ -45,14 +56,14 @@
             <div class="control">
                 <input type="number" class="input is-info" v-model="new_pet_lostfound_date_m" min="1" max="12" placeholder="MM" style="width: 80px;" required>&ensp;/
                 <input type="number" class="input is-info" v-model="new_pet_lostfound_date_d" min="1" max="31" placeholder="DD" style="width: 80px;" required>&ensp;/
-                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_y" min="2017" max="2022" placeholder="YYYY" style="width: 120px;" required>
+                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_y" min="2012" max="2022" placeholder="YYYY" style="width: 120px;" required>
             </div>
             <div class="has-text-danger" v-if="err_date">
                 Error {{err_date_i}}
             </div>
         </div>
         <div class="field">
-            <label class="label">Description</label>
+            <label class="label">Description (required)</label>
             <div class="control">
                 <textarea class="textarea is-info" v-model="new_description" >
                 </textarea>
@@ -70,10 +81,10 @@
                 Error {{err_coord_i}}
             </div>
         </div>
-        <button class="button is-info" @click="add_post()">Add Post</button>
+        <button class="button is-link" @click="add_post()">Add Post</button>
     </div>
     <div v-if="post_success" class="notification is-success is-size-5">
-        Success! The posting has been accepted.
+        Success! The posting for {{new_pet_name}} lost on {{new_pet_lostfound_date_m}}/{{new_pet_lostfound_date_d}}/{{new_pet_lostfound_date_y}} has been accepted.
     </div>
 </div>
 [[block page_scripts]]

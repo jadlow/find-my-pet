@@ -20,6 +20,7 @@ def get_time():
 db.define_table('pet',
                 Field('pet_name', 'string', requires=IS_NOT_EMPTY(), label=T('Pet Name')),
                 Field('pet_type', 'string', requires=IS_NOT_EMPTY()),
+                Field('pet_lost', 'boolean', default=True),
                 Field('pet_lostfound_date', 'date', requires=IS_NOT_EMPTY()),
                 Field('is_reunited', 'boolean', default=False),
                 Field('description', 'text', requires=IS_NOT_EMPTY(), label=T('Description')),
