@@ -76,9 +76,15 @@
             <label class="label">Lost/Found Location Coordinates (required)</label>
             <div class="control">
                 <input type="text" class="input is-info" v-model="new_pet_lat_lng" @change="location_preview()" @keyup="location_preview()" required>
+                <div style="margin-top: 3px;">
+                    <button class="button is-info" @click="current_location()"><i class="fa fa-map-pin"></i>&ensp;Get current location (permissions needed)</button>
+                </div>
             </div>
             <div class="has-text-danger" v-if="err_coord">
                 Error {{err_coord_i}}
+            </div>
+            <div class="has-text-grey" v-if="war_geoloc">
+                This site is not able to get your current location due to lack of permissions.
             </div>
             <div class="is-size-5" style="margin-top: 5px;">
                 Preview of set location

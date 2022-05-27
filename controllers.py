@@ -183,15 +183,6 @@ def add_post():
     )
     return dict()
 
-"""
-# Add a pet post success page load controller, done by Chen W.
-@action("add_success")
-@action.uses("../components/add_success.html", url_signer)
-def add_success_serve():
-    print("naqui @ 187 @ add_success")
-    return dict(url_signer = url_signer)
-"""
-
 # This endpoint will be used for URLS of the form /edit/k where k is the product id.
 @action('edit/<pet_id:int>', method=["GET", "POST"])
 @action.uses(db, session, auth.user, url_signer.verify(), '../components/edit.html')

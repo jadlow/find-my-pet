@@ -26,13 +26,13 @@ let init = (app) => {
         err_type_i: "",
         err_lost: false,
         err_lost_i: "",
-        war_lost: "",
         err_date: false,
         err_date_i: "",
         err_description: false,
         err_description_i: "",
         err_coord: false,
         err_coord_i: "",
+        war_geoloc: false,
         location_preview_zoom: 12,
     };
 
@@ -52,6 +52,7 @@ let init = (app) => {
         app.vue.err_date = false;
         app.vue.err_description = false;
         app.vue.err_coord = false;
+        app.vue.err_geoloc = false;
         
         // Check name.
         if(app.vue.new_pet_name.replace(/\s/g, "").length == 0){
@@ -227,13 +228,28 @@ let init = (app) => {
             return -1;
         }
         document.getElementById("display_location").src = "https://maps.google.com/maps?q=" + new_pet_lat + "," + new_pet_lng + "&z=" + app.vue.location_preview_zoom + "&output=embed";
-    }
+    };
+
+    app.current_location = function(){
+        app.vue.war_geoloc = false;
+        navigator.geolocation.getCurrentPosition(
+            function(pos_obj){
+                app.vue.new_pet_lat_lng = pos_obj.coords.latitude + ", " + pos_obj.coords.longitude;
+                app.location_preview();
+            },
+            function(err){
+                app.vue.war_geoloc = true;
+                return -1;
+            }
+        );
+    };
 
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
         add_post: app.new_post,
         location_preview: app.location_preview,
+        current_location: app.current_location,
     };
 
     // This creates the Vue instance.
