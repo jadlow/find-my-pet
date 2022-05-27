@@ -75,13 +75,23 @@
         <div class="field">
             <label class="label">Lost/Found Location Coordinates (required)</label>
             <div class="control">
-                <input type="text" class="input is-info" v-model="new_pet_lat_lng" required>
+                <input type="text" class="input is-info" v-model="new_pet_lat_lng" @change="location_preview()" @keyup="location_preview()" required>
             </div>
             <div class="has-text-danger" v-if="err_coord">
                 Error {{err_coord_i}}
             </div>
+            <div class="is-size-5" style="margin-top: 5px;">
+                Preview of set location
+                <iframe src="https://maps.google.com/maps?output=embed" id="display_location" style="border: 3px solid #6060ff; border-radius: 4px; height: 200px; width: 100%;"></iframe>
+                Zoom: <i class="fa fa-search-minus"></i>&ensp;<input type="range" class="range" min="1" max="18" v-model="location_preview_zoom" @change="location_preview()">&ensp;<i class="fa fa-search-plus"></i>
+            </div>
         </div>
         <button class="button is-link" @click="add_post()">Add Post</button>
+        <div class="has-text-danger" v-if="err_main">
+            There has been an error with your submission information.
+            Please check the form above.
+            Error checking is only performed when you click the "Add Post" button, not when you are modifying the values.
+        </div>
     </div>
     <div v-if="post_success" class="notification is-success is-size-5">
         Success! The posting for {{new_pet_name}} lost on {{new_pet_lostfound_date_m}}/{{new_pet_lostfound_date_d}}/{{new_pet_lostfound_date_y}} has been accepted.
