@@ -52,7 +52,7 @@ let init = (app) => {
         app.vue.err_date = false;
         app.vue.err_description = false;
         app.vue.err_coord = false;
-        app.vue.err_geoloc = false;
+        app.vue.war_geoloc = false;
         
         // Check name.
         if(app.vue.new_pet_name.replace(/\s/g, "").length == 0){
