@@ -148,7 +148,7 @@ def map_load_pins():
     return dict()
 
 @action('settings')
-@action.uses(db, session, auth.user, '../components/settings.html')
+@action.uses('../components/settings.html', db, session, auth.user)
 def serve_settings():
     form = Form(db.user, csrf_session=session, formstyle=FormStyleBulma)
     if form.accepted:
@@ -161,7 +161,7 @@ def serve_settings():
 
 # Add a pet page load controller, done by Chen W.
 @action("add")
-@action.uses(db, session, auth.user, "../components/add.html", url_signer)
+@action.uses("../components/add.html", db, session, auth.user, url_signer)
 def serve_add():
     return dict(
         add_post_url=URL("add_post", signer=url_signer),
@@ -185,7 +185,7 @@ def add_post():
 
 # This endpoint will be used for URLS of the form /edit/k where k is the product id.
 @action('edit/<pet_id:int>', method=["GET", "POST"])
-@action.uses(db, session, auth.user, url_signer.verify(), '../components/edit.html')
+@action.uses('../components/edit.html', db, session, auth.user, url_signer.verify())
 def edit(pet_id=None):
     assert pet_id is not None
     # We read the product being edited from the db.
@@ -218,7 +218,7 @@ def delete(pet_id=None):
 
 
 @action('add_comment/<pet_id:int>', method=["GET", "POST"])
-@action.uses(db, session, auth.user, '../components/add_comment.html')
+@action.uses('../components/add_comment.html', db, session, auth.user)
 def add_comment(pet_id=None):
     assert pet_id is not None
     form = Form([Field('post_text', 'text')], csrf_session=session,
@@ -242,7 +242,7 @@ def add_comment(pet_id=None):
 
 
 @action('edit_comment/<comment_id:int>', method=["GET", "POST"])
-@action.uses(db, session, auth.user, url_signer.verify(), '../components/edit_comment.html')
+@action.uses('../components/edit_comment.html', db, session, auth.user, url_signer.verify())
 def edit_comment(comment_id=None):
     assert comment_id is not None
     # We read the product being edited from the db.
