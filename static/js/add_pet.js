@@ -17,7 +17,7 @@ let init = (app) => {
         new_pet_lostfound_date_d: -1,
         new_pet_lostfound_date_y: -1,
         new_pet_lost: "true",
-        new_description: "",
+        new_pet_description: "",
         new_pet_lat_lng: "",
         err_name: false,
         err_name_i: "",
@@ -129,7 +129,7 @@ let init = (app) => {
         }
 
         // Check description.
-        if(app.vue.new_description.replace(/\s/g, "").length == 0){
+        if(app.vue.new_pet_description.replace(/\s/g, "").length == 0){
             app.vue.err_description_i = "description is empty. Please provide a description about your pet.";
             app.vue.err_description = true;
             return -1;
