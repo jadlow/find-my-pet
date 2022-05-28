@@ -77,7 +77,8 @@
             <div class="control">
                 <input type="text" class="input is-info" v-model="new_pet_lat_lng" @change="location_preview()" @input="location_preview()" @keyup="location_preview()" @paste="location_preview()" required>
                 <div style="margin-top: 3px;">
-                    <button class="button is-info" @click="current_location()"><i class="fa fa-map-pin"></i>&ensp;Get current location (permissions needed)</button>
+                    <button class="button is-info" @click="show_get_coord_info = true"><i class="fa fa-info-circle"></i>&ensp;How to get coordinates</button>&ensp;
+                    <button class="button is-info" @click="current_location(); prg_geoloc = true"><i class="fa fa-map-pin"></i>&ensp;Get current location (permissions needed)</button>
                 </div>
             </div>
             <div class="has-text-danger" v-if="err_coord">
@@ -85,6 +86,9 @@
             </div>
             <div class="has-text-grey" v-if="war_geoloc">
                 This site is not able to get your current location due to lack of permissions.
+            </div>
+            <div class="has-text-grey" v-if="prg_geoloc">
+                Retrieving current location...
             </div>
             <div class="is-size-5" style="margin-top: 5px;">
                 Preview of set location
@@ -102,6 +106,19 @@
     <div v-if="post_success" class="notification is-success is-size-5">
         Success! The posting for {{new_pet_name}} lost on {{new_pet_lostfound_date_m}}/{{new_pet_lostfound_date_d}}/{{new_pet_lostfound_date_y}} has been accepted.
     </div>
+    <div class="modal is-active" v-if="show_get_coord_info">
+        <div class="modal-background"></div>
+        <div class="modal-content is-size-5">
+            <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
+                <button class="button is-danger" @click="show_get_coord_info = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="box">
+                To get the coordinates, please go to <a href="https://www.google.com/maps" target="_blank">Google Maps</a>.
+                Navigate to the location where the pet was lost or found.
+                Right-click directly on the location and select the coordinates which will be automatically copied.
+            </div>
+        </div>
+      </div>
 </div>
 [[block page_scripts]]
 <script src="js/add_pet.js"></script>

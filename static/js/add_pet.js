@@ -33,7 +33,9 @@ let init = (app) => {
         err_coord: false,
         err_coord_i: "",
         war_geoloc: false,
+        prg_geoloc: false,
         location_preview_zoom: 12,
+        show_get_coord_info: false,
     };
 
     app.enumerate = (a) => {
@@ -235,10 +237,12 @@ let init = (app) => {
         navigator.geolocation.getCurrentPosition(
             function(pos_obj){
                 app.vue.new_pet_lat_lng = pos_obj.coords.latitude + ", " + pos_obj.coords.longitude;
+                app.vue.prg_geoloc = false;
                 app.location_preview();
             },
             function(err){
                 app.vue.war_geoloc = true;
+                app.vue.prg_geoloc = false;
                 return -1;
             }
         );
