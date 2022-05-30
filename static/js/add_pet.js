@@ -12,7 +12,7 @@ let init = (app) => {
         // Complete as you see fit.
         post_success: false,
         new_pet_name: "",
-        new_pet_type: "Dog",
+        new_pet_type: "",
         new_pet_lostfound_date_m: -1,
         new_pet_lostfound_date_d: -1,
         new_pet_lostfound_date_y: -1,
@@ -30,6 +30,7 @@ let init = (app) => {
         err_date_i: "",
         err_description: false,
         err_description_i: "",
+        description_rec_words: [],
         err_coord: false,
         err_coord_i: "",
         war_geoloc: false,
@@ -145,8 +146,8 @@ let init = (app) => {
         }
 
         // Check description.
-        if(app.vue.new_pet_description.replace(/\s/g, "").length == 0){
-            app.vue.err_description_i = "description is empty. Please provide a description about your pet.";
+        if(app.vue.new_pet_description.replace(/\s/g, "").length < 20){
+            app.vue.err_description_i = "description does not reach length requirement. Please provide a description about the pet with at least 20 characters, excluding spaces.";
             app.vue.err_description = true;
             app.vue.err_main = true;
             return -1;
@@ -248,12 +249,138 @@ let init = (app) => {
         );
     };
 
+    app.calc_description_length = function(){
+        const new_pet_description_length = app.vue.new_pet_description.replace(/\s/g, "").length;
+        const new_pet_description_min_length_reached = new_pet_description_length >= 20 ? "reached" : "not reached";
+        document.querySelector("#show_description_length").innerHTML = "<span style=\"color: " + (new_pet_description_length >= 20 ? "#00aa00" : "#ff0000") + "\"><i class=\"fa fa-pencil-square\"></i></span>&ensp;" + new_pet_description_length + " characters inputted, excluding spaces (20 minimum requirement " + new_pet_description_min_length_reached + ")";
+    };
+
+    app.gen_description_rec = function(){
+        const words_pool = [
+            // Age
+            // --- Age year
+            "<_int+ne1_> years old", "<_int+eq1_> year old", "<_int+ne1_> yrs old", "<_int+eq1_> yr old", "<_int+ne1_> yrs. old",
+            "<_int+eq1_> yr. old",
+            // --- Age month
+            "<_int+ne1_> months old", "<_int+eq1_> month old", "<_int+ne1_> mos old", "<_int+eq1_> mo old", "<_int+ne1_> mos. old",
+            "<_int+eq1_> mo. old",
+            // --- Age week
+            "<_int+ne1_> weeks old", "<_int+eq1_> week old", "<_int+ne1_> wks old", "<_int+eq1_> wk old", "<_int+ne1_> wks. old",
+            "<_int+eq1_> wk. old",
+            // --- Age day
+            "<_int+ne1_> days old", "<_int+eq1_> day old", "<_int+ne1_> d old", "<_int+ne1_> d. old", "<_int+eq1_> d old",
+            "<_int+eq1_> d. old",
+            // Height
+            // --- Height meter
+            "<_int+ne1_> meters high", "<_int+ne1_> meters tall", "<_int+eq1_> meter high", "<_int+eq1_> meter tall", "<_int+ne1_> m high",
+            "<_int+ne1_> m tall", "<_int+ne1_> m. high", "<_int+ne1_> m. tall", "<_int+eq1_> m high", "<_int+eq1_> m tall",
+            "<_int+eq1_> m. high", "<_int+eq1_> m. tall",
+            // --- Height foot
+            "<_int+ne1_> feet high", "<_int+ne1_> feet tall", "<_int+eq1_> foot high", "<_int+eq1_> foot tall", "<_int+ne1_> ft high",
+            "<_int+ne1_> ft tall", "<_int+ne1_> ft. high", "<_int+ne1_> ft. tall", "<_int+eq1_> ft high", "<_int+eq1_> ft tall",
+            "<_int+eq1_> ft. high", "<_int+eq1_> ft. tall", 
+            // --- Height inch
+            "<_int+ne1_> inches high", "<_int+ne1_> inches tall", "<_int+eq1_> inch high", "<_int+eq1_> inch tall", "<_int+ne1_> in high",
+            "<_int+ne1_> in tall", "<_int+ne1_> in. high", "<_int+ne1_> in. tall", "<_int+eq1_> in high", "<_int+eq1_> in tall",
+            "<_int+eq1_> in. high", "<_int+eq1_> in. tall",
+            // --- Height centimeter
+            "<_int+ne1_> centimeters high", "<_int+ne1_> centimeters tall", "<_int+eq1_> centimeter high", "<_int+eq1_> centimeter tall", "<_int+ne1_> cm high",
+            "<_int+ne1_> cm tall", "<_int+ne1_> cm. high", "<_int+ne1_> cm. tall", "<_int+eq1_> cm high", "<_int+eq1_> cm tall",
+            "<_int+eq1_> cm. high", "<_int+eq1_> cm. tall",
+            // Dogs (source: https://www.akc.org/expert-advice/dog-breeds/most-popular-dog-breeds-of-2021/)
+            "Labrador Retriever dog", "French Bulldog dog", "Golden Retriever dog", "German Sheperd dog", "Poodle dog",
+            "Bulldog dog", "Beagle dog", "Rottweiler dog", "German Shorthaired Pointer dog", "Dachshund dog",
+            "Pembroke Welsh Corgi dog", "Australian Shepherd dog", "Yorkshire Terrier dog", "Boxer dog", "Cavalier King Charles Spaniel dog",
+            "Doberman Pinscher dog", "Great Dane dog", "Miniature Schnauzer dog", "Siberian Husky dog", "Bernese Mountain dog",
+            "Cane Corso dog", "Shih Tzu dog", "Boston Terrier dog", "Pomeranian dog", "Havanese dog",
+            "English Springer Spaniel dog", "Brittany dog", "Shetland Sheepdog dog", "Cocker Spaniel dog", "Miniature American Shepherd dog",
+            "Border Collie dog", "Vizsla dog", "Pug dog", "Basset Hound dog", "Mastiff dog",
+            "Belgian Malinois dog", "Chihuahua dog", "Collie dog", "Maltese dog", "Weimaraner dog",
+            // Cats (source: https://www.catbreedslist.com/)
+            "Ragdoll cat", "Exotic Shorthair cat", "British Shorthair cat", "Persian cat", "Maine Coon cat",
+            "American Shorthair cat", "Devon Rex cat", "Sphynx cat", "Scottish Fold cat", "Abyssinian cat",
+            "Oriental cat", "Siamese cat", "Norwegian Forest cat", "Cornish Rex cat", "Bengal cat",
+            "Russian Blue cat", "Siberian cat", "Burmese cat", "Birman cat", "Tonkinese cat",
+            "Ocicat cat", "Selkirk Rex cat", "Ragamuffin cat", "American Curl cat", "Japanese Bobtail cat",
+            "Manx cat", "Egyptian Mau cat", "Somali cat", "Balinese cat", "Singapura cat",
+            "Colorpoint Shorthair cat", "Lykoi cat", "Chartreux cat", "Turkish Angora cat", "European Burmese cat",
+            "Bombay cat", "Khao Manee cat", "Burmilla cat", "Korat cat", "American Bobtail cat"
+
+        ];
+        if(app.vue.new_pet_description.length == 0){
+            app.vue.description_rec_words = ["Dog", "Cat", "Reptile", "Rabbit"];
+            return 1;
+        }
+        const desElement = document.querySelector("#in_description");
+        const desElementSelEnd = desElement.selectionEnd - 1;
+        if(isNaN(desElementSelEnd) || isNaN(parseInt(desElementSelEnd))){
+            return 1;
+        }
+        if(app.vue.new_pet_description[desElementSelEnd] == " "){
+            return 1;
+        }
+        else{
+            app.vue.description_rec_words = [];
+            let curr_word = app.vue.new_pet_description[desElementSelEnd];
+            let temp_des_ind = desElementSelEnd - 1;
+            while(true){
+                if(temp_des_ind < 0){
+                    break;
+                }
+                if(app.vue.new_pet_description[temp_des_ind] == " "){
+                    break;
+                }
+                curr_word = app.vue.new_pet_description[temp_des_ind] + curr_word;
+                temp_des_ind -= 1;
+            }
+            curr_word = curr_word.toLowerCase();
+            if(!isNaN(curr_word) && !isNaN(parseFloat(curr_word))){
+                if(parseFloat(curr_word) == 1){
+                    curr_word = "<_int+eq1_>";
+                }
+                else{
+                    curr_word = "<_int+ne1_>"
+                }
+            }
+            for(let ws in words_pool){
+                const words = words_pool[ws];
+                const words_split = words.split(" ");
+                let words_split_lower = [];
+                for(let w in words_split){
+                    words_split_lower.push(words_split[w].toLowerCase());
+                }
+                if(words_split_lower.includes(curr_word)){
+                    const words_ind = words_split_lower.indexOf(curr_word);
+                    for(let w = words_ind + 1; w < words_split.length; w++){
+                        if(!app.vue.description_rec_words.includes(words_split[w])){
+                            app.vue.description_rec_words.push(words_split[w]);
+                        }
+                    }
+                }
+            }
+            app.vue.description_rec_words.sort(function(fw, sw){
+                return fw.toLowerCase().localeCompare(sw.toLowerCase());
+            });
+        }
+    };
+
+    app.put_description_rec = function(new_word){
+        new_word = new_word["word"];
+        const desElement = document.querySelector("#in_description");
+        const desElementSelEnd = desElement.selectionEnd;
+        app.vue.new_pet_description = app.vue.new_pet_description.slice(0, desElementSelEnd) + (app.vue.new_pet_description[desElementSelEnd - 1] == " " ? "": " ") + new_word + app.vue.new_pet_description.slice(desElementSelEnd);
+        desElement.focus();
+    };
+
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
         add_post: app.new_post,
         location_preview: app.location_preview,
         current_location: app.current_location,
+        calc_description_length: app.calc_description_length,
+        gen_description_rec: app.gen_description_rec,
+        put_description_rec: app.put_description_rec,
     };
 
     // This creates the Vue instance.
