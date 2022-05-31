@@ -36,7 +36,7 @@ let init = (app) => {
         war_geoloc: false,
         prg_geoloc: false,
         location_preview_zoom: 12,
-        show_get_coord_info: false,
+        show_get_coord_info: false
     };
 
     app.enumerate = (a) => {
@@ -206,7 +206,7 @@ let init = (app) => {
                 new_pet_lostfound_date_y: app.vue.new_pet_lostfound_date_y,
                 new_pet_description: app.vue.new_pet_description,
                 new_pet_lat: new_pet_lat,
-                new_pet_lng: new_pet_lng,
+                new_pet_lng: new_pet_lng
             }    
         );
         app.vue.post_success = true;
@@ -256,39 +256,55 @@ let init = (app) => {
     };
 
     app.gen_description_rec = function(){
+        /*
+        Description word recommendations work by going through a word pool, seeing if the word is in the
+        phrase, if so, put the words after in the recommendations. <_num+ne1_> is token for numbers not 
+        1, <_num+eq1_> is token for 1.
+        */ 
         const words_pool = [
             // Age
             // --- Age year
-            "<_int+ne1_> years old", "<_int+eq1_> year old", "<_int+ne1_> yrs old", "<_int+eq1_> yr old", "<_int+ne1_> yrs. old",
-            "<_int+eq1_> yr. old",
+            "age <_num+ne1_> years old", "age <_num+eq1_> year old",
             // --- Age month
-            "<_int+ne1_> months old", "<_int+eq1_> month old", "<_int+ne1_> mos old", "<_int+eq1_> mo old", "<_int+ne1_> mos. old",
-            "<_int+eq1_> mo. old",
+            "age <_num+ne1_> months old", "age <_num+eq1_> month old",
             // --- Age week
-            "<_int+ne1_> weeks old", "<_int+eq1_> week old", "<_int+ne1_> wks old", "<_int+eq1_> wk old", "<_int+ne1_> wks. old",
-            "<_int+eq1_> wk. old",
+            "age <_num+ne1_> weeks old", "age <_num+eq1_> week old",
             // --- Age day
-            "<_int+ne1_> days old", "<_int+eq1_> day old", "<_int+ne1_> d old", "<_int+ne1_> d. old", "<_int+eq1_> d old",
-            "<_int+eq1_> d. old",
+            "age <_num+ne1_> days old", "age <_num+eq1_> day old",
             // Height
             // --- Height meter
-            "<_int+ne1_> meters high", "<_int+ne1_> meters tall", "<_int+eq1_> meter high", "<_int+eq1_> meter tall", "<_int+ne1_> m high",
-            "<_int+ne1_> m tall", "<_int+ne1_> m. high", "<_int+ne1_> m. tall", "<_int+eq1_> m high", "<_int+eq1_> m tall",
-            "<_int+eq1_> m. high", "<_int+eq1_> m. tall",
+            "<_num+ne1_> meters high", "<_num+ne1_> meters tall", "<_num+eq1_> meter high", "<_num+eq1_> meter tall",
             // --- Height foot
-            "<_int+ne1_> feet high", "<_int+ne1_> feet tall", "<_int+eq1_> foot high", "<_int+eq1_> foot tall", "<_int+ne1_> ft high",
-            "<_int+ne1_> ft tall", "<_int+ne1_> ft. high", "<_int+ne1_> ft. tall", "<_int+eq1_> ft high", "<_int+eq1_> ft tall",
-            "<_int+eq1_> ft. high", "<_int+eq1_> ft. tall", 
+            "<_num+ne1_> feet high", "<_num+ne1_> feet tall", "<_num+eq1_> foot high", "<_num+eq1_> foot tall", 
             // --- Height inch
-            "<_int+ne1_> inches high", "<_int+ne1_> inches tall", "<_int+eq1_> inch high", "<_int+eq1_> inch tall", "<_int+ne1_> in high",
-            "<_int+ne1_> in tall", "<_int+ne1_> in. high", "<_int+ne1_> in. tall", "<_int+eq1_> in high", "<_int+eq1_> in tall",
-            "<_int+eq1_> in. high", "<_int+eq1_> in. tall",
+            "<_num+ne1_> inches high", "<_num+ne1_> inches tall", "<_num+eq1_> inch high", "<_num+eq1_> inch tall",
             // --- Height centimeter
-            "<_int+ne1_> centimeters high", "<_int+ne1_> centimeters tall", "<_int+eq1_> centimeter high", "<_int+eq1_> centimeter tall", "<_int+ne1_> cm high",
-            "<_int+ne1_> cm tall", "<_int+ne1_> cm. high", "<_int+ne1_> cm. tall", "<_int+eq1_> cm high", "<_int+eq1_> cm tall",
-            "<_int+eq1_> cm. high", "<_int+eq1_> cm. tall",
+            "<_num+ne1_> centimeters high", "<_num+ne1_> centimeters tall", "<_num+eq1_> centimeter high", "<_num+eq1_> centimeter tall",
+            // Weight
+            // --- Weight pound
+            "weight <_num+ne1_> pounds", "weight <_num+eq1_> pound",
+            // --- Weight kilos
+            "weight <_num+ne1_> kilos", "weight <_num+eq1_> kilo",
+            // Colour
+            // --- Colour red
+            "red hair", "red fur", "red feathers",
+            // --- Colour orange
+            "orange hair", "orange fur", "orange feathers",
+            // --- Colour yellow
+            "yellow hair", "yellow fur", "yellow feathers",
+            // --- Colour green
+            "green hair", "green fur", "green feathers",
+            // --- Colour blue
+            "blue hair", "blue fur", "blue feathers",
+            // --- Colour white
+            "white hair", "white fur", "white feathers",
+            // --- Colour gray
+            "gray hair", "gray fur", "gray feathers", "grey hair", "grey fur",
+            "grey feathers",
+            // --- Colour black
+            "black hair", "black fur", "black feathers",
             // Dogs (source: https://www.akc.org/expert-advice/dog-breeds/most-popular-dog-breeds-of-2021/)
-            "Labrador Retriever dog", "French Bulldog dog", "Golden Retriever dog", "German Sheperd dog", "Poodle dog",
+            "Labrador Retriever dog", "French Bulldog dog", "Golden Retriever dog", "German Shepherd dog", "Poodle dog",
             "Bulldog dog", "Beagle dog", "Rottweiler dog", "German Shorthaired Pointer dog", "Dachshund dog",
             "Pembroke Welsh Corgi dog", "Australian Shepherd dog", "Yorkshire Terrier dog", "Boxer dog", "Cavalier King Charles Spaniel dog",
             "Doberman Pinscher dog", "Great Dane dog", "Miniature Schnauzer dog", "Siberian Husky dog", "Bernese Mountain dog",
@@ -304,11 +320,14 @@ let init = (app) => {
             "Ocicat cat", "Selkirk Rex cat", "Ragamuffin cat", "American Curl cat", "Japanese Bobtail cat",
             "Manx cat", "Egyptian Mau cat", "Somali cat", "Balinese cat", "Singapura cat",
             "Colorpoint Shorthair cat", "Lykoi cat", "Chartreux cat", "Turkish Angora cat", "European Burmese cat",
-            "Bombay cat", "Khao Manee cat", "Burmilla cat", "Korat cat", "American Bobtail cat"
-
+            "Bombay cat", "Khao Manee cat", "Burmilla cat", "Korat cat", "American Bobtail cat",
+            // Birds (source: https://www.thehappychickencoop.com/14-of-the-most-popular-companion-birds/)
+            "Parakeet bird", "African Gray Parrot bird", "Lovebird bird", "Cockatoo bird", "Finch bird",
+            "Dove bird", "Cockatiel bird", "Parrotlet bird", "Conure bird", "Monk Parakeet bird",
+            "Amazon Parrot bird", "Pionus Parrot bird", "Hyacinth Macaw bird", "Hahn’s Macaw bird"
         ];
         if(app.vue.new_pet_description.length == 0){
-            app.vue.description_rec_words = ["Dog", "Cat", "Reptile", "Rabbit"];
+            app.vue.description_rec_words = ["age", "height", "weight", "Dog", "Cat", "Bird", "Reptile", "Rabbit"];
             return 1;
         }
         const desElement = document.querySelector("#in_description");
@@ -336,10 +355,10 @@ let init = (app) => {
             curr_word = curr_word.toLowerCase();
             if(!isNaN(curr_word) && !isNaN(parseFloat(curr_word))){
                 if(parseFloat(curr_word) == 1){
-                    curr_word = "<_int+eq1_>";
+                    curr_word = "<_num+eq1_>";
                 }
                 else{
-                    curr_word = "<_int+ne1_>"
+                    curr_word = "<_num+ne1_>"
                 }
             }
             for(let ws in words_pool){
@@ -352,8 +371,15 @@ let init = (app) => {
                 if(words_split_lower.includes(curr_word)){
                     const words_ind = words_split_lower.indexOf(curr_word);
                     for(let w = words_ind + 1; w < words_split.length; w++){
-                        if(!app.vue.description_rec_words.includes(words_split[w])){
+                        if(!app.vue.description_rec_words.includes(words_split[w]) && (words_split[w] != "<_num+eq1_>") && (words_split[w] != "<_num+ne1_>")){
                             app.vue.description_rec_words.push(words_split[w]);
+                        }
+                        else if(!app.vue.description_rec_words.includes(words_split[w])){
+                            for(let i = 1; i < 11; i++){
+                                if(!app.vue.description_rec_words.includes(i)){
+                                    app.vue.description_rec_words.push(i);
+                                }
+                            }
                         }
                     }
                 }
@@ -380,7 +406,7 @@ let init = (app) => {
         current_location: app.current_location,
         calc_description_length: app.calc_description_length,
         gen_description_rec: app.gen_description_rec,
-        put_description_rec: app.put_description_rec,
+        put_description_rec: app.put_description_rec
     };
 
     // This creates the Vue instance.
@@ -395,8 +421,8 @@ let init = (app) => {
         // Put here any initialization code.
         // Typically this is a server GET call to load the data.
         const today = new Date();
-        app.vue.new_pet_lostfound_date_m = String(today.getMonth() + 1).padStart(2, '0');
-        app.vue.new_pet_lostfound_date_d = String(today.getDate()).padStart(2, '0');
+        app.vue.new_pet_lostfound_date_m = String(today.getMonth() + 1).padStart(2, "0");
+        app.vue.new_pet_lostfound_date_d = String(today.getDate()).padStart(2, "0");
         app.vue.new_pet_lostfound_date_y = today.getFullYear();
     };
 
