@@ -41,6 +41,16 @@ db.define_table('comment',
 
 db.comment.id.readable = db.comment.id.writable = False
 
+db.define_table('upload',
+                Field('owner', default=get_user_email),
+                Field('file_name'),
+                Field('file_type'),
+                Field('file_date'),
+                Field('file_path'),
+                Field('file_size', 'integer'),
+                Field('confirmed', 'boolean', default=False),  # Was the upload to GCS confirmed?
+                )
+
 db.define_table('user',
                 # Field('auth_user_id', 'reference auth_user'),
                 Field('photo', 'upload'),  # This contains the image URL, see Unit 18

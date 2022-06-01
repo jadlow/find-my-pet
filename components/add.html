@@ -73,6 +73,12 @@
             </div>
         </div>
         <div class="field">
+            <label class="label">Pet Image (required)</label>
+            <a class="button" href="[[=URL('add_image', signer=url_signer)]]">
+                <span class="icon"><i class="fa fa-fw fa-plus"></i></span>
+            </a>
+        </div>
+        <div class="field">
             <label class="label">Lost/Found Location Coordinates (required)</label>
             <div class="control">
                 <input type="text" class="input is-info" v-model="new_pet_lat_lng" required>
