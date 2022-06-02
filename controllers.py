@@ -182,7 +182,12 @@ def serve_settings():
 def serve_add():
     return dict(
         add_post_url=URL("add_post", signer=url_signer),
-        url_signer=url_signer
+        url_signer=url_signer,
+        # GCS
+        file_info_url=URL('file_info', signer=url_signer),
+        obtain_gcs_url=URL('obtain_gcs', signer=url_signer),
+        notify_url=URL('notify_upload', signer=url_signer),
+        delete_url=URL('notify_delete', signer=url_signer),
     )
 
 # Add a pet post controller, done by Chen W.
@@ -196,7 +201,8 @@ def add_post():
         pet_lostfound_date = datetime.datetime(request.json.get("new_pet_lostfound_date_y"), request.json.get("new_pet_lostfound_date_m"), request.json.get("new_pet_lostfound_date_d")),
         description = request.json.get("new_pet_description"),
         pet_lat = request.json.get("new_pet_lat"),
-        pet_lng = request.json.get("new_pet_lng")
+        pet_lng = request.json.get("new_pet_lng"),
+        photo = request.json.get("photo"),
     )
     return dict()
 
@@ -208,16 +214,6 @@ def add_success_serve():
     print("naqui @ 187 @ add_success")
     return dict(url_signer = url_signer)
 """
-
-@action('add_image')
-@action.uses('../components/add_image.html', url_signer, db, auth.user)
-def add_image():
-    return dict(
-        file_info_url = URL('file_info', signer=url_signer),
-        obtain_gcs_url = URL('obtain_gcs', signer=url_signer),
-        notify_url = URL('notify_upload', signer=url_signer),
-        delete_url = URL('notify_delete', signer=url_signer),
-    )
 
 @action('file_info')
 @action.uses(url_signer.verify(), db)
@@ -307,8 +303,12 @@ def notify_upload():
         file_size=file_size,
         confirmed=True,
     )
+    # save the id of the uploaded image for pet reference
+    upload = db(db.upload.file_path == file_path).select().first()
+    upload_id = upload.id
     # Returns the file information.
     return dict(
+        upload_id=upload_id,
         download_url=gcs_url(GCS_KEYS, file_path, verb='GET'),
         file_date=d,
     )

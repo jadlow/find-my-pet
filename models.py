@@ -17,6 +17,16 @@ def get_time():
 
 ### Define your table below
 
+db.define_table('upload',
+                Field('owner', default=get_user_email),
+                Field('file_name'),
+                Field('file_type'),
+                Field('file_date'),
+                Field('file_path'),
+                Field('file_size', 'integer'),
+                Field('confirmed', 'boolean', default=False),  # Was the upload to GCS confirmed?
+                )
+
 db.define_table('pet',
                 Field('pet_name', 'string', requires=IS_NOT_EMPTY(), label=T('Pet Name')),
                 Field('pet_type', 'string', requires=IS_NOT_EMPTY()),
@@ -24,7 +34,7 @@ db.define_table('pet',
                 Field('pet_lostfound_date', 'date', requires=IS_NOT_EMPTY()),
                 Field('is_reunited', 'boolean', default=False),
                 Field('description', 'text', requires=IS_NOT_EMPTY(), label=T('Description')),
-                Field('photo', 'text'),  # This contains the image URL, see Unit 18
+                Field('photo', 'reference upload'),  # This contains the image URL, see Unit 18
                 Field('pet_latlng_square', 'string'),  # This is the ~1KM square.
                 Field('pet_lat', 'double', requires=IS_NOT_EMPTY()),
                 Field('pet_lng', 'double', requires=IS_NOT_EMPTY()),
@@ -40,16 +50,6 @@ db.define_table('comment',
                 )
 
 db.comment.id.readable = db.comment.id.writable = False
-
-db.define_table('upload',
-                Field('owner', default=get_user_email),
-                Field('file_name'),
-                Field('file_type'),
-                Field('file_date'),
-                Field('file_path'),
-                Field('file_size', 'integer'),
-                Field('confirmed', 'boolean', default=False),  # Was the upload to GCS confirmed?
-                )
 
 db.define_table('user',
                 # Field('auth_user_id', 'reference auth_user'),
