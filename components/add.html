@@ -1,12 +1,18 @@
 [[extend 'layout.html']]
 
-<div class="section" id="vue-target-newpost">
+<style>
+    [v-cloak] {
+         display: none;
+    }
+</style>
+
+<div class="section" id="vue-target-newpost" v-cloak>
     <h1 class="title">Create a Lost/Found Pet Post</h1>
     <div v-if="!post_success">
         <div class="field">
             <label class="label">Name (required, if you do not know the name especially in the case you found the pet, please input "Don't Know")</label>
             <div class="control">
-                <input type="text" class="input is-info" v-model="new_pet_name" required>
+                <input type="text" class="input is-info" v-model="new_pet_name">
             </div>
             <div class="has-text-danger" v-if="err_name">
                 Error {{err_name_i}}
@@ -15,8 +21,9 @@
         <div class="field">
             <label class="label">Pet type (required)</label>
             <div class="control">
-                <div class="select is-info" required>
+                <div class="select is-info">
                     <select v-model="new_pet_type">
+                        <option selected> </option>
                         <option>Dog</option>
                         <option>Cat</option>
                         <option>Bird</option>
@@ -54,9 +61,9 @@
         <div class="field">
             <label class="label">Lost/Found Date (required)</label>
             <div class="control">
-                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_m" min="1" max="12" placeholder="MM" style="width: 80px;" required>&ensp;/
-                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_d" min="1" max="31" placeholder="DD" style="width: 80px;" required>&ensp;/
-                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_y" min="2012" max="2022" placeholder="YYYY" style="width: 120px;" required>
+                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_m" min="1" max="12" placeholder="MM" style="width: 80px;">&ensp;/
+                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_d" min="1" max="31" placeholder="DD" style="width: 80px;">&ensp;/
+                <input type="number" class="input is-info" v-model="new_pet_lostfound_date_y" min="2012" max="2022" placeholder="YYYY" style="width: 120px;">
             </div>
             <div class="has-text-danger" v-if="err_date">
                 Error {{err_date_i}}
@@ -65,11 +72,22 @@
         <div class="field">
             <label class="label">Description (required)</label>
             <div class="control">
-                <textarea class="textarea is-info" v-model="new_pet_description" >
+                <textarea class="textarea is-info" v-model="new_pet_description" id="in_description" @change="calc_description_length(); gen_description_rec()" @focus="gen_description_rec()" @input="calc_description_length(); gen_description_rec()" @keyup="calc_description_length(); gen_description_rec()" @paste="calc_description_length(); gen_description_rec()" @selectionchange="calc_description_length(); gen_description_rec()">
                 </textarea>
+            </div>
+            <div class="has-text-grey">
+                Recommended words:
+                <span v-for="word in description_rec_words">
+                    <div style="display: inline; margin-left: 3px; margin-right: 3px;">
+                        <button class="button is-light is-small" @click="put_description_rec({word})" style="text-decoration: underline;">{{word}}</button>
+                    </div>
+                </span>
             </div>
             <div class="has-text-danger" v-if="err_description">
                 Error {{err_description_i}}
+            </div>
+            <div class="has-text-grey" id="show_description_length">
+                <span style="color: #ff0000;"><i class="fa fa-pencil-square"></i></span>&ensp;0 characters inputted, excluding spaces (20 minimum requirement not reached)
             </div>
         </div>
         <div class="field">
@@ -112,16 +130,57 @@
         <div class="field">
             <label class="label">Lost/Found Location Coordinates (required)</label>
             <div class="control">
-                <input type="text" class="input is-info" v-model="new_pet_lat_lng" required>
+                <input type="text" class="input is-info" v-model="new_pet_lat_lng" @change="location_preview()" @input="location_preview()" @keyup="location_preview()" @paste="location_preview()">
+                <div style="margin-top: 3px;">
+                    <button class="button is-info" @click="show_get_coord_info = true"><i class="fa fa-info-circle"></i>&ensp;How to get coordinates</button>&ensp;
+                    <button class="button is-info" @click="current_location(); prg_geoloc = true"><i class="fa fa-map-pin"></i>&ensp;Get current location (permissions needed)</button>
+                </div>
             </div>
             <div class="has-text-danger" v-if="err_coord">
                 Error {{err_coord_i}}
             </div>
+            <div class="has-text-grey" v-if="war_geoloc">
+                This site is not able to get your current location due to lack of permissions.
+            </div>
+            <div class="has-text-grey" v-if="prg_geoloc">
+                Retrieving current location...
+            </div>
+            <div class="is-size-5" style="margin-top: 5px;">
+                Preview of set location
+                <iframe src="https://maps.google.com/maps?output=embed" id="display_location" style="border: 3px solid #d00000; border-radius: 4px; height: 200px; width: 100%;"></iframe>
+                Zoom: <i class="fa fa-search-minus"></i>&ensp;<input type="range" class="range" min="1" max="18" v-model="location_preview_zoom" @change="location_preview()">&ensp;<i class="fa fa-search-plus"></i>
+            </div>
         </div>
-        <button class="button is-link" @click="add_post()">Add Post</button>
+        <button class="button is-link" @click="add_post()">Report Pet</button>
     </div>
     <div v-if="post_success" class="notification is-success is-size-5">
         Success! The posting for {{new_pet_name}} lost on {{new_pet_lostfound_date_m}}/{{new_pet_lostfound_date_d}}/{{new_pet_lostfound_date_y}} has been accepted.
+    </div>
+    <div class="modal is-active" v-if="show_get_coord_info">
+        <div class="modal-background"></div>
+        <div class="modal-content is-size-5">
+            <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
+                <button class="button is-danger" @click="show_get_coord_info = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="box">
+                To get the coordinates, please go to <a href="https://www.google.com/maps" target="_blank">Google Maps</a>.
+                Navigate to the location where the pet was lost or found.
+                Right-click directly on the location and select the coordinates which will be automatically copied.
+            </div>
+        </div>
+    </div>
+    <div class="modal is-active" v-if="err_main">
+        <div class="modal-background"></div>
+        <div class="modal-content is-size-5">
+            <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
+                <button class="button is-danger" @click="err_main = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="box">
+                There has been an error with your submission information.
+                Please check the form's fields.
+                Error checking is only performed when you click the "Report Pet" button, not when you are modifying the values.
+            </div>
+        </div>
     </div>
 </div>
 [[block page_scripts]]
