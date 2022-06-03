@@ -87,8 +87,14 @@ def serve_main():
 @action('load_posts')
 @action.uses(url_signer.verify(), db)
 def load_posts():
-    pets = db(db.pet.user_email == db.auth_user.email).select(orderby=~db.pet.creation_date).as_list()
-    return dict(pets=pets)
+    rows = db(db.pet.user_email == db.auth_user.email).select(orderby=~db.pet.creation_date)
+    for row in rows:
+        u_row = db(db.upload.id == row.pet.photo).select().as_list()
+        file_path = u_row[0]['file_path']
+
+        row.pet["signed_url"] = None if file_path is None else gcs_url(GCS_KEYS, file_path, verb='GET')
+    li = rows.as_list()
+    return dict(pets=li)
 
 
 @action('load_comments')
@@ -210,6 +216,7 @@ def add_post():
 @action('file_info')
 @action.uses(url_signer.verify(), db)
 def file_info():
+    print("file_info")
     """Returns to the web app the information about the file currently
     uploaded, if any, so that the user can download it or replace it with
     another file if desired."""
@@ -242,6 +249,7 @@ def file_info():
 @action.uses(url_signer.verify(), db)
 def obtain_gcs():
     """Returns the URL to do download / upload / delete for GCS."""
+    print("obtain_gcs")
     verb = request.json.get("action")
     if verb == "PUT":
         mimetype = request.json.get("mimetype", "")
@@ -264,14 +272,15 @@ def obtain_gcs():
             r = db(db.upload.file_path == file_path).select().first()
             if r is not None and r.owner == get_user_email():
                 # Yes, we can let the deletion happen.
-                delete_url = gcs_url(GCS_KEYS, file_path, verb='DELETE')
-                return dict(signed_url=delete_url)
+                signed_url = gcs_url(GCS_KEYS, file_path, verb=verb)
+                return dict(signed_url=signed_url)
         # Otherwise, we return no URL, so we don't authorize the deletion.
         return dict(signer_url=None)
 
 @action('notify_upload', method="POST")
 @action.uses(url_signer.verify(), db)
 def notify_upload():
+    print("notify_upload")
     """We get the notification that the file has been uploaded."""
     file_type = request.json.get("file_type")
     file_name = request.json.get("file_name")
@@ -298,8 +307,10 @@ def notify_upload():
     # save the id of the uploaded image for pet reference
     upload = db(db.upload.file_path == file_path).select().first()
     upload_id = upload.id
+    signed_url = gcs_url(GCS_KEYS, file_path, verb='GET')
     # Returns the file information.
     return dict(
+        preview_url=signed_url,
         upload_id=upload_id,
         download_url=gcs_url(GCS_KEYS, file_path, verb='GET'),
         file_date=d,
@@ -310,11 +321,13 @@ def notify_upload():
 def notify_delete():
     file_path = request.json.get("file_path")
     # We check that the owner matches to prevent DDOS.
+    print("notify_delete")
     db((db.upload.owner == get_user_email()) &
        (db.upload.file_path == file_path)).delete()
     return dict()
 
 def delete_path(file_path):
+    print("delete_path")
     """Deletes a file given the path, without giving error if the file
     is missing."""
     try:
@@ -325,6 +338,7 @@ def delete_path(file_path):
         pass
 
 def delete_previous_uploads():
+    print("delete_previous_uploads")
     """Deletes all previous uploads for a user, to be ready to upload a new file."""
     previous = db(db.upload.owner == get_user_email()).select()
     for p in previous:
@@ -333,8 +347,9 @@ def delete_previous_uploads():
     db(db.upload.owner == get_user_email()).delete()
 
 def mark_possible_upload(file_path):
+    print("mark_possible_upload")
     """Marks that a file might be uploaded next."""
-    delete_previous_uploads()
+    # delete_previous_uploads()
     db.upload.insert(
         owner=get_user_email(),
         file_path=file_path,
@@ -368,6 +383,16 @@ def delete(pet_id=None):
     p = db.pet[pet_id]
     if p.user_email != get_user_email():
         redirect(URL('index'))
+    u_row = db(db.upload.id == p.photo).select().as_list()
+    file_path = u_row[0]['file_path']
+    print(file_path)
+    if file_path is not None:
+        # We check that the file_path belongs to the user.
+        r = db(db.upload.file_path == file_path).select().first()
+        if r is not None and r.owner == get_user_email():
+            # Yes, we can let the deletion happen.
+            signed_url = gcs_url(GCS_KEYS, file_path, verb='DELETE')
+    db(db.upload.id == p.photo).delete()
     db(db.pet.id == pet_id).delete()
     redirect(URL('index'))
 

@@ -102,7 +102,6 @@ let init = (app) => {
         pet.add_comment_content = "";
     };
 
-
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.

@@ -81,6 +81,7 @@ let init = (app) => {
         deleting: false, // delete in progress
         delete_confirmation: false, // Show the delete confirmation thing.
         upload_id: -1,
+        preview_url: null,
     };
 
     app.enumerate = (a) => {
@@ -386,7 +387,7 @@ let init = (app) => {
             app.vue.file_date = null;
             app.vue.file_path = null;
             app.vue.download_url = null;
-            app.vue.upload_id = null;
+            app.vue.upload_id = -1;
         })
     }
 
