@@ -91,7 +91,7 @@
             </div>
         </div>
         <div class="field">
-            <Label class="label">Image Upload</Label>
+            <Label class="label">Photo upload (required, one photo only)</Label>
             <div class="field has-addons">
                 <p class="control">
                   <div class="file is-info">
@@ -103,7 +103,7 @@
                           <i v-else class="fa fa-upload fa-fw"></i>
                         </span>
                         <span class="file-label">
-                          <span v-if="!uploading">Upload new file</span>
+                          <span v-if="!uploading">Upload photo</span>
                         </span>
                       </span>
                     </label>
@@ -117,7 +117,7 @@
                     </span>
                     <span>{{file_info}}</span>
                   </button>
-                  <button v-else class="button is-static">No file uploaded</button>
+                  <button v-else class="button is-static">No photo uploaded</button>
                 </p>
                 <p class="control" v-if='file_path'>
                   <button class="button is-danger" @click="delete_file" :class="{'is-loading': deleting}">
@@ -128,6 +128,16 @@
               </div>
             <div>
                 
+            </div>
+            <div class="has-text-danger" v-if="err_photo_bad_type">
+                Error file extension not supported. Please upload a photo file of the extension
+                <span v-for="ext in photo_extensions">
+                    {{ext}}<span v-if="ext != photo_extensions[photo_extensions.length - 1]">,</span><span v-else>.</span>
+                    <span v-if="ext == photo_extensions[photo_extensions.length - 2]">or</span>
+                </span>
+            </div>
+            <div class="has-text-danger" v-if="err_photo_null">
+                Error no photo uploaded. Please upload a photo.
             </div>
         </div>
         <div class="field">
@@ -154,13 +164,20 @@
                 Zoom: <i class="fa fa-search-minus"></i>&ensp;<input type="range" class="range" min="1" max="18" v-model="location_preview_zoom" @change="location_preview()">&ensp;<i class="fa fa-search-plus"></i>
             </div>
         </div>
-        <button class="button is-link" @click="add_post()">Report Pet</button>
+        <button class="button is-link" @click="add_post()">
+            Report Pet&nbsp;
+            <span v-if="new_pet_lost == 'true'">Lost</span>
+            <span v-else>Found</span>
+        </button>
     </div>
     <div v-if="post_success" class="notification is-success is-size-5">
         Success! The posting for {{new_pet_name}} lost on {{new_pet_lostfound_date_m}}/{{new_pet_lostfound_date_d}}/{{new_pet_lostfound_date_y}} has been accepted.
+        <div style="margin-top: 5px;">
+            <a href="[[=URL('main-page')]]" class="button is-info"><i class="fa fa-paw"></i>&ensp;Lost and Found Pets page</a>
+        </div>
     </div>
     <div class="modal is-active" v-if="show_get_coord_info">
-        <div class="modal-background"></div>
+        <div class="modal-background" @click="show_get_coord_info = false"></div>
         <div class="modal-content is-size-5">
             <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
                 <button class="button is-danger" @click="show_get_coord_info = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
@@ -173,7 +190,7 @@
         </div>
     </div>
     <div class="modal is-active" v-if="err_main">
-        <div class="modal-background"></div>
+        <div class="modal-background" @click="err_main = false"></div>
         <div class="modal-content is-size-5">
             <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
                 <button class="button is-danger" @click="err_main = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
@@ -181,7 +198,7 @@
             <div class="box">
                 There has been an error with your submission information.
                 Please check the form's fields.
-                Error checking is only performed when you click the "Report Pet" button, not when you are modifying the values.
+                Note: Error checking is usually performed when the Report Pet button is clicked, not checked when the input fields' values are being changed, so the error messages may get outdated.
             </div>
         </div>
     </div>

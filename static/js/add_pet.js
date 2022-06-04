@@ -64,6 +64,9 @@ let init = (app) => {
         err_description: false,
         err_description_i: "",
         description_rec_words: [],
+        err_photo_null: false,
+        err_photo_bad_type: false,
+        photo_extensions: ["gif", "jpg", "jpeg", "png", "svg", "tif", "webp"],
         err_coord: false,
         err_coord_i: "",
         war_geoloc: false,
@@ -81,7 +84,7 @@ let init = (app) => {
         deleting: false, // delete in progress
         delete_confirmation: false, // Show the delete confirmation thing.
         upload_id: -1,
-        preview_url: null,
+        preview_url: null
     };
 
     app.enumerate = (a) => {
@@ -99,6 +102,8 @@ let init = (app) => {
         app.vue.err_lost = false;
         app.vue.err_date = false;
         app.vue.err_description = false;
+        app.vue.err_photo_null = false;
+        app.vue.err_photo_bad_type = false;
         app.vue.err_coord = false;
         app.vue.war_geoloc = false;
         
@@ -194,6 +199,13 @@ let init = (app) => {
         if(app.vue.new_pet_description.replace(/\s/g, "").length < 20){
             app.vue.err_description_i = "description does not reach length requirement. Please provide a description about the pet with at least 20 characters, excluding spaces.";
             app.vue.err_description = true;
+            app.vue.err_main = true;
+            return -1;
+        }
+
+        // Check photo
+        if(app.vue.file_name == null || app.vue.file_name == ""){
+            app.vue.err_photo_null = true;
             app.vue.err_main = true;
             return -1;
         }
@@ -297,11 +309,27 @@ let init = (app) => {
     }
 
     app.upload_file = function (event) {
+        app.vue.err_photo_bad_type = false;
         let input = event.target;
         let file = input.files[0];
         if (file) {
             app.vue.uploading = true;
             let file_type = file.type;
+            if(!app.vue.photo_extensions.includes(file_type.toLowerCase().split("/")[1])){
+                app.vue.err_photo_bad_type = true;
+                app.vue.file_name = null;
+                app.vue.file_type = null;
+                app.vue.file_date = null;
+                app.vue.file_path = null;
+                app.vue.file_size = null;
+                app.vue.download_url = null;
+                app.vue.uploading = false;
+                app.vue.deleting = false;
+                app.vue.delete_confirmation = false;
+                app.vue.upload_id = -1;
+                app.vue.preview_url = null;
+                return -1;
+            }
             let file_name = file.name;
             let file_size = file.size;
             // Requests the upload URL.
@@ -485,16 +513,18 @@ let init = (app) => {
             "age <_num+ne1_> days old", "age <_num+eq1_> day old",
             // Height
             // --- Height meter
-            "<_num+ne1_> meters high", "<_num+ne1_> meters tall", "<_num+eq1_> meter high", "<_num+eq1_> meter tall",
+            "height <_num+ne1_> meters high", "height <_num+ne1_> meters tall", "height <_num+eq1_> meter high", "height <_num+eq1_> meter tall",
             // --- Height foot
-            "<_num+ne1_> feet high", "<_num+ne1_> feet tall", "<_num+eq1_> foot high", "<_num+eq1_> foot tall", 
+            "height <_num+ne1_> feet high", "height <_num+ne1_> feet tall", "height <_num+eq1_> foot high", "height <_num+eq1_> foot tall", 
             // --- Height inch
-            "<_num+ne1_> inches high", "<_num+ne1_> inches tall", "<_num+eq1_> inch high", "<_num+eq1_> inch tall",
+            "height <_num+ne1_> inches high", "height <_num+ne1_> inches tall", "height <_num+eq1_> inch high", "height <_num+eq1_> inch tall",
             // --- Height centimeter
-            "<_num+ne1_> centimeters high", "<_num+ne1_> centimeters tall", "<_num+eq1_> centimeter high", "<_num+eq1_> centimeter tall",
+            "height <_num+ne1_> centimeters high", "height <_num+ne1_> centimeters tall", "height <_num+eq1_> centimeter high", "height <_num+eq1_> centimeter tall",
             // Weight
             // --- Weight pound
             "weight <_num+ne1_> pounds", "weight <_num+eq1_> pound",
+            // --- Weight ounce
+            "weight <_num+ne1_> ounces", "weight <_num+eq1_> ounce",
             // --- Weight kilos
             "weight <_num+ne1_> kilos", "weight <_num+eq1_> kilo",
             // Colour
@@ -539,7 +569,7 @@ let init = (app) => {
             "Amazon Parrot bird", "Pionus Parrot bird", "Hyacinth Macaw bird", "Hahn’s Macaw bird"
         ];
         if(app.vue.new_pet_description.length == 0){
-            app.vue.description_rec_words = ["age", "height", "weight", "Dog", "Cat", "Bird", "Reptile", "Rabbit"];
+            app.vue.description_rec_words = ["age", "height", "weight", "dog", "cat", "bird", "rabbit"];
             return 1;
         }
         const desElement = document.querySelector("#in_description");
@@ -554,6 +584,13 @@ let init = (app) => {
             app.vue.description_rec_words = [];
             let curr_word = app.vue.new_pet_description[desElementSelEnd];
             let temp_des_ind = desElementSelEnd - 1;
+            let other_pets = ["dog", "cat", "bird"];
+            if(other_pets.indexOf(app.vue.new_pet_type.toLowerCase()) != -1){
+                other_pets.splice(other_pets.indexOf(app.vue.new_pet_type.toLowerCase()), 1);
+            }
+            else{
+                other_pets = [];
+            }
             while(true){
                 if(temp_des_ind < 0){
                     break;
@@ -580,16 +617,16 @@ let init = (app) => {
                 for(let w in words_split){
                     words_split_lower.push(words_split[w].toLowerCase());
                 }
-                if(words_split_lower.includes(curr_word)){
+                if(words_split_lower.includes(curr_word) && !(other_pets.some(r =>  words_split_lower.includes(r)))){
                     const words_ind = words_split_lower.indexOf(curr_word);
                     for(let w = words_ind + 1; w < words_split.length; w++){
                         if(!app.vue.description_rec_words.includes(words_split[w]) && (words_split[w] != "<_num+eq1_>") && (words_split[w] != "<_num+ne1_>")){
                             app.vue.description_rec_words.push(words_split[w]);
                         }
                         else if(!app.vue.description_rec_words.includes(words_split[w])){
-                            for(let i = 1; i < 11; i++){
-                                if(!app.vue.description_rec_words.includes(i)){
-                                    app.vue.description_rec_words.push(i);
+                            for(let i = 1; i < 10; i++){
+                                if(!app.vue.description_rec_words.includes("" + i)){
+                                    app.vue.description_rec_words.push("" + i);
                                 }
                             }
                         }
@@ -606,7 +643,12 @@ let init = (app) => {
         new_word = new_word["word"];
         const desElement = document.querySelector("#in_description");
         const desElementSelEnd = desElement.selectionEnd;
-        app.vue.new_pet_description = app.vue.new_pet_description.slice(0, desElementSelEnd) + (app.vue.new_pet_description[desElementSelEnd - 1] == " " ? "": " ") + new_word + app.vue.new_pet_description.slice(desElementSelEnd);
+        if(app.vue.new_pet_description.length == 0){
+            app.vue.new_pet_description = new_word;
+        }
+        else{
+            app.vue.new_pet_description = app.vue.new_pet_description.slice(0, desElementSelEnd) + (app.vue.new_pet_description[desElementSelEnd - 1] == " " ? "": " ") + new_word + app.vue.new_pet_description.slice(desElementSelEnd);
+        }
         desElement.focus();
     };
 
