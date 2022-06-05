@@ -44,14 +44,14 @@ let init = (app) => {
     app.data = {
         // Complete as you see fit.
         post_success: false,
-        new_pet_name: "",
-        new_pet_type: "",
-        new_pet_lostfound_date_m: -1,
-        new_pet_lostfound_date_d: -1,
-        new_pet_lostfound_date_y: -1,
-        new_pet_lost: "true",
-        new_pet_description: "",
-        new_pet_lat_lng: "",
+        cur_pet_name: "",
+        cur_pet_type: "",
+        cur_pet_lostfound_date_m: -1,
+        cur_pet_lostfound_date_d: -1,
+        cur_pet_lostfound_date_y: -1,
+        cur_pet_lost: "true",
+        cur_pet_description: "",
+        cur_pet_lat_lng: "",
         err_main: false,
         err_name: false,
         err_name_i: "",
@@ -84,7 +84,11 @@ let init = (app) => {
         deleting: false, // delete in progress
         delete_confirmation: false, // Show the delete confirmation thing.
         upload_id: -1,
-        preview_url: null
+        upload_id_temp: -1,
+        temp_file_path: null,
+        preview_url: null,
+        new_img_post: false,
+        new_img_post_check_other: false
     };
 
     app.enumerate = (a) => {
@@ -95,7 +99,7 @@ let init = (app) => {
     };
 
 
-    app.new_post = function(){
+    app.edit_post = function(){
         app.vue.err_main = false;
         app.vue.err_name = false;
         app.vue.err_type = false;
@@ -108,7 +112,7 @@ let init = (app) => {
         app.vue.war_geoloc = false;
         
         // Check name.
-        if(app.vue.new_pet_name.replace(/\s/g, "").length == 0){
+        if(app.vue.cur_pet_name.replace(/\s/g, "").length == 0){
             app.vue.err_name_i = "empty pet name. Please specify a pet name that contains 1 or more characters."
             app.vue.err_name = true;
             app.vue.err_main = true;
@@ -116,7 +120,7 @@ let init = (app) => {
         }
 
         // Check type.
-        if(!["Dog", "Cat", "Bird", "Rodent", "Reptile", "Rabbit", "Pet Livestock", "Aquatic", "Other"].includes(app.vue.new_pet_type)){
+        if(!["Dog", "Cat", "Bird", "Rodent", "Reptile", "Rabbit", "Pet Livestock", "Aquatic", "Other"].includes(app.vue.cur_pet_type)){
             app.vue.err_type_i = "invalid pet type. Please select a pet type from the given options."
             app.vue.err_type = true;
             app.vue.err_main = true;
@@ -124,71 +128,71 @@ let init = (app) => {
         }
 
         // Check lost.
-        if(!["true", "false"].includes(app.vue.new_pet_lost)){
+        if(!["true", "false"].includes(app.vue.cur_pet_lost)){
             app.vue.err_lost_i = "invalid pet lost or found value. Please select whether the pet was lost or found.";
             app.vue.err_lost = true;
             app.vue.err_main = true;
             return -1;
         }
-        let new_pet_lost_bool = true;
-        if(app.vue.new_pet_lost == "false"){
-            new_pet_lost_bool = false;
+        let cur_pet_lost_bool = true;
+        if(app.vue.cur_pet_lost == "false"){
+            cur_pet_lost_bool = false;
         }
 
         // Check date.
-        if(isNaN(app.vue.new_pet_lostfound_date_m) || isNaN(parseInt(app.vue.new_pet_lostfound_date_m))){
+        if(isNaN(app.vue.cur_pet_lostfound_date_m) || isNaN(parseInt(app.vue.cur_pet_lostfound_date_m))){
             app.vue.err_date_i = "month is not a number. Please specify a month with a number.";
             app.vue.err_date = true;
             app.vue.err_main = true;
             return -1;
         }
-        app.vue.new_pet_lostfound_date_m = parseInt(app.vue.new_pet_lostfound_date_m);
-        if((app.vue.new_pet_lostfound_date_m < 1) || (app.vue.new_pet_lostfound_date_m > 12)){
+        app.vue.cur_pet_lostfound_date_m = parseInt(app.vue.cur_pet_lostfound_date_m);
+        if((app.vue.cur_pet_lostfound_date_m < 1) || (app.vue.cur_pet_lostfound_date_m > 12)){
             app.vue.err_date_i = "month not in range. Please specify a month with a number between 1 to 12.";
             app.vue.err_date = true;
             app.vue.err_main = true;
             return -1;
         }
-        if(isNaN(app.vue.new_pet_lostfound_date_d) || isNaN(parseInt(app.vue.new_pet_lostfound_date_d))){
+        if(isNaN(app.vue.cur_pet_lostfound_date_d) || isNaN(parseInt(app.vue.cur_pet_lostfound_date_d))){
             app.vue.err_date_i = "date is not a number. Please specify a date with a number.";
             app.vue.err_date = true;
             app.vue.err_main = true;
             return -1;
         }
-        app.vue.new_pet_lostfound_date_d = parseInt(app.vue.new_pet_lostfound_date_d);
-        if(isNaN(app.vue.new_pet_lostfound_date_y) || isNaN(parseInt(app.vue.new_pet_lostfound_date_y))){
+        app.vue.cur_pet_lostfound_date_d = parseInt(app.vue.cur_pet_lostfound_date_d);
+        if(isNaN(app.vue.cur_pet_lostfound_date_y) || isNaN(parseInt(app.vue.cur_pet_lostfound_date_y))){
             app.vue.err_date_i = "year is not a number. Please specify a year with a number";
             app.vue.err_date = true;
             app.vue.err_main = true;
             return -1;
         }
-        app.vue.new_pet_lostfound_date_y = parseInt(app.vue.new_pet_lostfound_date_y);
-        if((app.vue.new_pet_lostfound_date_y < 2012) || (app.vue.new_pet_lostfound_date_y > 2022)){
+        app.vue.cur_pet_lostfound_date_y = parseInt(app.vue.cur_pet_lostfound_date_y);
+        if((app.vue.cur_pet_lostfound_date_y < 2012) || (app.vue.cur_pet_lostfound_date_y > 2022)){
             app.vue.err_date_i = "year not in range. Please specify a year with a number between 2012 to 2022.";
             app.vue.err_date = true;
             app.vue.err_main = true;
             return -1;
         }
         let month_upp = -1;
-        if([1, 3, 5, 7, 8, 10, 12].includes(app.vue.new_pet_lostfound_date_m)){
+        if([1, 3, 5, 7, 8, 10, 12].includes(app.vue.cur_pet_lostfound_date_m)){
             month_upp = 31;
         }
-        else if(app.vue.new_pet_lostfound_date_m > 2){
+        else if(app.vue.cur_pet_lostfound_date_m > 2){
             month_upp = 30;
         }
         else{
-            const leap_year = (0 == app.vue.new_pet_lostfound_date_y % 4) && (0 != app.vue.new_pet_lostfound_date_y % 100) || (0 == app.vue.new_pet_lostfound_date_y % 400);
+            const leap_year = (0 == app.vue.cur_pet_lostfound_date_y % 4) && (0 != app.vue.cur_pet_lostfound_date_y % 100) || (0 == app.vue.cur_pet_lostfound_date_y % 400);
             month_upp = !leap_year ? 28 : 29;
         }
         const today_date = new Date();
-        const in_date = new Date(app.vue.new_pet_lostfound_date_y, app.vue.new_pet_lostfound_date_m - 1, app.vue.new_pet_lostfound_date_d);
+        const in_date = new Date(app.vue.cur_pet_lostfound_date_y, app.vue.cur_pet_lostfound_date_m - 1, app.vue.cur_pet_lostfound_date_d);
         if(in_date.getTime() > today_date.getTime()){
             app.vue.err_date_i = "date is in the future. Please specify a date between January 1, 2012 to today.";
             app.vue.err_date = true;
             app.vue.err_main = true;
             return -1;
         }
-        if(app.vue.new_pet_lostfound_date_d < 1 || app.vue.new_pet_lostfound_date_d > month_upp){
+        if(app.vue.cur_pet_lostfound_date_d < 1 || app.vue.cur_pet_lostfound_date_d > month_upp){
             app.vue.err_date_i = "date not in range. Please specify a date with a number between 1 and " + month_upp + ".";
             app.vue.err_date = true;
             app.vue.err_main = true;
@@ -196,7 +200,7 @@ let init = (app) => {
         }
 
         // Check description.
-        if(app.vue.new_pet_description.replace(/\s/g, "").length < 20){
+        if(app.vue.cur_pet_description.replace(/\s/g, "").length < 20){
             app.vue.err_description_i = "description does not reach length requirement. Please provide a description about the pet with at least 20 characters, excluding spaces.";
             app.vue.err_description = true;
             app.vue.err_main = true;
@@ -204,70 +208,80 @@ let init = (app) => {
         }
 
         // Check photo
-        if(app.vue.file_name == null || app.vue.file_name == ""){
-            app.vue.err_photo_null = true;
-            app.vue.err_main = true;
-            return -1;
+        if(!app.vue.new_img_post_check_other){
+            if(app.vue.file_name == null || app.vue.file_name == ""){
+                app.vue.err_photo_null = true;
+                app.vue.err_main = true;
+                return -1;
+            }
         }
 
         // Check coordinates.
-        const new_pet_lat_lng_cleaned = app.vue.new_pet_lat_lng.replace(/\s/g, "");
-        new_pet_lat_lng_split = new_pet_lat_lng_cleaned.split(",");
-        if(new_pet_lat_lng_split.length != 2){
+        const cur_pet_lat_lng_cleaned = app.vue.cur_pet_lat_lng.replace(/\s/g, "");
+        cur_pet_lat_lng_split = cur_pet_lat_lng_cleaned.split(",");
+        if(cur_pet_lat_lng_split.length != 2){
             app.vue.err_coord_i = "coordinate length invalid. Please specify a coordinate with two numbers separated by a comma.";
             app.vue.err_coord = true;
             app.vue.err_main = true;
             return -1;
         }
-        let new_pet_lat = new_pet_lat_lng_split[0];
-        let new_pet_lng = new_pet_lat_lng_split[1];
-        if(isNaN(new_pet_lat) || isNaN(parseFloat(new_pet_lat))){
+        let cur_pet_lat = cur_pet_lat_lng_split[0];
+        let cur_pet_lng = cur_pet_lat_lng_split[1];
+        if(isNaN(cur_pet_lat) || isNaN(parseFloat(cur_pet_lat))){
             app.vue.err_coord_i = "latitude is not a number. Please specify a number for the latitude.";
             app.vue.err_coord = true;
             app.vue.err_main = true;
             return -1;
         }
         else{
-            new_pet_lat = parseFloat(new_pet_lat);
+            cur_pet_lat = parseFloat(cur_pet_lat);
         }
-        if(isNaN(new_pet_lng) || isNaN(parseFloat(new_pet_lng))){
+        if(isNaN(cur_pet_lng) || isNaN(parseFloat(cur_pet_lng))){
             app.vue.err_coord_i = "longitude is not a number. Please specify a number for the longitude.";
             app.vue.err_coord = true;
             app.vue.err_main = true;
             return -1;
         }
         else{
-            new_pet_lng = parseFloat(new_pet_lng);
+            cur_pet_lng = parseFloat(cur_pet_lng);
         }
-        if(new_pet_lat < -90 || new_pet_lat > 90){
+        if(cur_pet_lat < -90 || cur_pet_lat > 90){
             app.vue.err_coord_i = "latitude is not in range. Please specify a number for the latitude between -90 to 90.";
             app.vue.err_coord = true;
             app.vue.err_main = true;
             return -1;
         }
-        if(new_pet_lng < -180 || new_pet_lng > 180){
+        if(cur_pet_lng < -180 || cur_pet_lng > 180){
             app.vue.err_coord_i = "longitude is not in range. Please specify a number for the longitude between -180 to 180.";
             app.vue.err_coord = true;
             app.vue.err_main = true;
             return -1;
         }
 
-        // Everything alright, add entry.
-        axios.post(add_post_url,
-            {
-                new_pet_name: app.vue.new_pet_name,
-                new_pet_type: app.vue.new_pet_type,
-                new_pet_lost: new_pet_lost_bool,
-                new_pet_lostfound_date_m: app.vue.new_pet_lostfound_date_m,
-                new_pet_lostfound_date_d: app.vue.new_pet_lostfound_date_d,
-                new_pet_lostfound_date_y: app.vue.new_pet_lostfound_date_y,
-                new_pet_description: app.vue.new_pet_description,
-                new_pet_lat: new_pet_lat,
-                new_pet_lng: new_pet_lng,
-                photo: app.vue.upload_id,
-            }    
-        );
-        app.vue.post_success = true;
+        if(!app.vue.new_img_post_check_other){
+            // Everything alright, edit entry.
+            axios.post(edit_post_url,
+                {
+                    cur_pet_name: app.vue.cur_pet_name,
+                    cur_pet_type: app.vue.cur_pet_type,
+                    cur_pet_lost: cur_pet_lost_bool,
+                    cur_pet_lostfound_date_m: app.vue.cur_pet_lostfound_date_m,
+                    cur_pet_lostfound_date_d: app.vue.cur_pet_lostfound_date_d,
+                    cur_pet_lostfound_date_y: app.vue.cur_pet_lostfound_date_y,
+                    cur_pet_description: app.vue.cur_pet_description,
+                    cur_pet_lat: cur_pet_lat,
+                    cur_pet_lng: cur_pet_lng,
+                    photo: app.vue.upload_id,
+                }    
+            );
+        }
+
+        if(!app.vue.new_img_post && !app.vue.new_img_post_check_other){
+            app.vue.post_success = true;
+        }
+        else{
+            app.vue.new_img_post = false;
+        }
     };
 
     app.file_info = function () {
@@ -310,6 +324,12 @@ let init = (app) => {
 
     app.upload_file = function (event) {
         app.vue.err_photo_bad_type = false;
+        app.vue.new_img_post_check_other = true;
+        if(app.edit_post() == -1){
+            app.vue.new_img_post_check_other = false;
+            return -1;
+        }
+        app.vue.new_img_post_check_other = false;
         let input = event.target;
         let file = input.files[0];
         if (file) {
@@ -317,19 +337,20 @@ let init = (app) => {
             let file_type = file.type;
             if(!app.vue.photo_extensions.includes(file_type.toLowerCase().split("/")[1])){
                 app.vue.err_photo_bad_type = true;
+                app.vue.delete_confirmation = false;
+                app.vue.deleting =  false;
                 app.vue.file_name = null;
                 app.vue.file_type = null;
                 app.vue.file_date = null;
-                app.vue.file_path = null;
                 app.vue.file_size = null;
+                app.vue.file_info = null;
                 app.vue.download_url = null;
                 app.vue.uploading = false;
-                app.vue.deleting = false;
-                app.vue.delete_confirmation = false;
-                app.vue.upload_id = -1;
-                app.vue.preview_url = null;
+                app.vue.temp_file_path = false;
+                app.vue.upload_id_temp = -1;
                 return -1;
             }
+            app.delete_file();
             let file_name = file.name;
             let file_size = file.size;
             // Requests the upload URL.
@@ -340,6 +361,7 @@ let init = (app) => {
             }).then ((r) => {
                 let upload_url = r.data.signed_url;
                 let file_path = r.data.file_path;
+                app.vue.temp_file_path = r.data.file_path;
                 // Uploads the file, using the low-level interface.
                 let req = new XMLHttpRequest();
                 // We listen to the load event = the file is uploaded, and we call upload_complete.
@@ -370,14 +392,33 @@ let init = (app) => {
             app.vue.file_date = r.data.file_date;
             app.vue.download_url = r.data.download_url;
             app.vue.upload_id = r.data.upload_id;
+            app.vue.upload_id_temp = app.vue.upload_id;
+            app.vue.temp_file_path = app.vue.file_path;
+            app.vue.new_img_post = true;
+            app.edit_post();
         });
     };
 
-    app.delete_file = function () {
+    app.pseudo_delete_file = function () {
         if (!app.vue.delete_confirmation) {
             // Ask for confirmation before deleting it.
             app.vue.delete_confirmation = true;
         } else {
+            app.vue.delete_confirmation = false;
+            app.vue.deleting =  false;
+            app.vue.file_name = null;
+            app.vue.file_type = null;
+            app.vue.file_date = null;
+            app.vue.file_size = null;
+            app.vue.file_info = null;
+            app.vue.download_url = null;
+            app.vue.uploading = false;
+            app.vue.temp_file_path = false;
+            app.vue.upload_id_temp = -1;
+        }
+    }
+
+    app.delete_file = function(){
             // It's confirmed.
             app.vue.delete_confirmation = false;
             app.vue.deleting = true;
@@ -400,8 +441,7 @@ let init = (app) => {
 
                 }
             });
-        }
-    };
+        };
 
     app.deletion_complete = function (file_path) {
         // We need to notify the server that the file has been deleted on GCS.
@@ -415,7 +455,9 @@ let init = (app) => {
             app.vue.file_date = null;
             app.vue.file_path = null;
             app.vue.download_url = null;
+            app.vue.upload_id_temp = -1;
             app.vue.upload_id = -1;
+            app.vue.temp_file_path = null;
         })
     };
 
@@ -454,30 +496,30 @@ let init = (app) => {
 
     app.location_preview = function(){
         document.getElementById("display_location").style.border="3px solid #60cc60";
-        const new_pet_lat_lng_cleaned = app.vue.new_pet_lat_lng.replace(/\s/g, "");
-        const new_pet_lat_lng_split = new_pet_lat_lng_cleaned.split(",");
-        if(new_pet_lat_lng_split.length != 2){
+        const cur_pet_lat_lng_cleaned = app.vue.cur_pet_lat_lng.replace(/\s/g, "");
+        const cur_pet_lat_lng_split = cur_pet_lat_lng_cleaned.split(",");
+        if(cur_pet_lat_lng_split.length != 2){
             document.getElementById("display_location").style.border="3px solid #d00000";
             return -1;
         }
-        const new_pet_lat = new_pet_lat_lng_split[0];
-        if(isNaN(new_pet_lat) || isNaN(parseFloat(new_pet_lat)) || parseFloat(new_pet_lat) < -90 || parseFloat(new_pet_lat) > 90){
+        const cur_pet_lat = cur_pet_lat_lng_split[0];
+        if(isNaN(cur_pet_lat) || isNaN(parseFloat(cur_pet_lat)) || parseFloat(cur_pet_lat) < -90 || parseFloat(cur_pet_lat) > 90){
             document.getElementById("display_location").style.border="3px solid #d00000";
             return -1;
         }
-        const new_pet_lng = new_pet_lat_lng_split[1];
-        if(isNaN(new_pet_lng) || isNaN(parseFloat(new_pet_lng)) || parseFloat(new_pet_lng) < -180 || parseFloat(new_pet_lng) > 180){
+        const cur_pet_lng = cur_pet_lat_lng_split[1];
+        if(isNaN(cur_pet_lng) || isNaN(parseFloat(cur_pet_lng)) || parseFloat(cur_pet_lng) < -180 || parseFloat(cur_pet_lng) > 180){
             document.getElementById("display_location").style.border="3px solid #d00000";
             return -1;
         }
-        document.getElementById("display_location").src = "https://maps.google.com/maps?q=" + new_pet_lat + "," + new_pet_lng + "&z=" + app.vue.location_preview_zoom + "&output=embed";
+        document.getElementById("display_location").src = "https://maps.google.com/maps?q=" + cur_pet_lat + "," + cur_pet_lng + "&z=" + app.vue.location_preview_zoom + "&output=embed";
     };
 
     app.current_location = function(){
         app.vue.war_geoloc = false;
         navigator.geolocation.getCurrentPosition(
             function(pos_obj){
-                app.vue.new_pet_lat_lng = pos_obj.coords.latitude + ", " + pos_obj.coords.longitude;
+                app.vue.cur_pet_lat_lng = pos_obj.coords.latitude + ", " + pos_obj.coords.longitude;
                 app.vue.prg_geoloc = false;
                 app.location_preview();
             },
@@ -490,9 +532,9 @@ let init = (app) => {
     };
 
     app.calc_description_length = function(){
-        const new_pet_description_length = app.vue.new_pet_description.replace(/\s/g, "").length;
-        const new_pet_description_min_length_reached = new_pet_description_length >= 20 ? "reached" : "not reached";
-        document.querySelector("#show_description_length").innerHTML = "<span style=\"color: " + (new_pet_description_length >= 20 ? "#00aa00" : "#ff0000") + "\"><i class=\"fa fa-pencil-square\"></i></span>&ensp;" + new_pet_description_length + " characters inputted, excluding spaces (20 minimum requirement " + new_pet_description_min_length_reached + ")";
+        const cur_pet_description_length = app.vue.cur_pet_description.replace(/\s/g, "").length;
+        const cur_pet_description_min_length_reached = cur_pet_description_length >= 20 ? "reached" : "not reached";
+        document.querySelector("#show_description_length").innerHTML = "<span style=\"color: " + (cur_pet_description_length >= 20 ? "#00aa00" : "#ff0000") + "\"><i class=\"fa fa-pencil-square\"></i></span>&ensp;" + cur_pet_description_length + " characters inputted, excluding spaces (20 minimum requirement " + cur_pet_description_min_length_reached + ")";
     };
 
     app.gen_description_rec = function(){
@@ -568,7 +610,7 @@ let init = (app) => {
             "Dove bird", "Cockatiel bird", "Parrotlet bird", "Conure bird", "Monk Parakeet bird",
             "Amazon Parrot bird", "Pionus Parrot bird", "Hyacinth Macaw bird", "Hahn’s Macaw bird"
         ];
-        if(app.vue.new_pet_description.length == 0){
+        if(app.vue.cur_pet_description.length == 0){
             app.vue.description_rec_words = ["age", "height", "weight", "dog", "cat", "bird", "rabbit"];
             return 1;
         }
@@ -577,16 +619,16 @@ let init = (app) => {
         if(isNaN(desElementSelEnd) || isNaN(parseInt(desElementSelEnd))){
             return 1;
         }
-        if(app.vue.new_pet_description[desElementSelEnd] == " "){
+        if(app.vue.cur_pet_description[desElementSelEnd] == " "){
             return 1;
         }
         else{
             app.vue.description_rec_words = [];
-            let curr_word = app.vue.new_pet_description[desElementSelEnd];
+            let curr_word = app.vue.cur_pet_description[desElementSelEnd];
             let temp_des_ind = desElementSelEnd - 1;
             let other_pets = ["dog", "cat", "bird"];
-            if(other_pets.indexOf(app.vue.new_pet_type.toLowerCase()) != -1){
-                other_pets.splice(other_pets.indexOf(app.vue.new_pet_type.toLowerCase()), 1);
+            if(other_pets.indexOf(app.vue.cur_pet_type.toLowerCase()) != -1){
+                other_pets.splice(other_pets.indexOf(app.vue.cur_pet_type.toLowerCase()), 1);
             }
             else{
                 other_pets = [];
@@ -595,10 +637,10 @@ let init = (app) => {
                 if(temp_des_ind < 0){
                     break;
                 }
-                if(app.vue.new_pet_description[temp_des_ind] == " "){
+                if(app.vue.cur_pet_description[temp_des_ind] == " "){
                     break;
                 }
-                curr_word = app.vue.new_pet_description[temp_des_ind] + curr_word;
+                curr_word = app.vue.cur_pet_description[temp_des_ind] + curr_word;
                 temp_des_ind -= 1;
             }
             curr_word = curr_word.toLowerCase();
@@ -639,23 +681,31 @@ let init = (app) => {
         }
     };
 
-    app.put_description_rec = function(new_word){
-        new_word = new_word["word"];
+    app.put_description_rec = function(cur_word){
+        cur_word = cur_word["word"];
         const desElement = document.querySelector("#in_description");
         const desElementSelEnd = desElement.selectionEnd;
-        if(app.vue.new_pet_description.length == 0){
-            app.vue.new_pet_description = new_word;
+        if(app.vue.cur_pet_description.length == 0){
+            app.vue.cur_pet_description = cur_word;
         }
         else{
-            app.vue.new_pet_description = app.vue.new_pet_description.slice(0, desElementSelEnd) + (app.vue.new_pet_description[desElementSelEnd - 1] == " " ? "": " ") + new_word + app.vue.new_pet_description.slice(desElementSelEnd);
+            app.vue.cur_pet_description = app.vue.cur_pet_description.slice(0, desElementSelEnd) + (app.vue.cur_pet_description[desElementSelEnd - 1] == " " ? "": " ") + cur_word + app.vue.cur_pet_description.slice(desElementSelEnd);
         }
         desElement.focus();
+    };
+
+    app.get_pet_info = function(){
+        axios.get(get_pet_info_url)
+            .then(function(res){
+                app.vue.cur_pet_name = res.data.cur_pet_name;
+            });
     };
 
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
-        add_post: app.new_post,
+        edit_post: app.edit_post,
+        get_pet_info: app.get_pet_info,
         location_preview: app.location_preview,
         current_location: app.current_location,
         calc_description_length: app.calc_description_length,
@@ -669,12 +719,13 @@ let init = (app) => {
         current_location: app.current_location,
         calc_description_length: app.calc_description_length,
         gen_description_rec: app.gen_description_rec,
-        put_description_rec: app.put_description_rec
+        put_description_rec: app.put_description_rec,
+        pseudo_delete_file: app.pseudo_delete_file
     };
 
     // This creates the Vue instance.
     app.vue = new Vue({
-        el: "#vue-target-newpost",
+        el: "#vue-target-editpost",
         data: app.data,
         methods: app.methods,
         // GCS
@@ -685,27 +736,40 @@ let init = (app) => {
     app.init = () => {
         // Put here any initialization code.
         // Typically this is a server GET call to load the data.
-        const today = new Date();
-        app.vue.new_pet_lostfound_date_m = String(today.getMonth() + 1).padStart(2, "0");
-        app.vue.new_pet_lostfound_date_d = String(today.getDate()).padStart(2, "0");
-        app.vue.new_pet_lostfound_date_y = today.getFullYear();
-        app.vue.file_name = null;
-        app.vue.file_type = null;
-        app.vue.file_date = null;
-        app.vue.file_path = null;
-        app.vue.file_size = null;
-        app.vue.download_url = null;
-        app.vue.uploading = false;
-        app.vue.deleting = false;
-        app.vue.delete_confirmation = false;
-        app.vue.upload_id = -1;
-        app.vue.preview_url = null;
-        /*
-        axios.get(file_info_url)
-            .then(function (r) {
-                app.set_result(r);
-            });
-        */
+        let photo_index = -1;
+        axios.get(get_pet_info_url)
+            .then(function(res){
+                app.vue.cur_pet_name = res.data.cur_pet_name;
+                app.vue.cur_pet_type = res.data.cur_pet_type;
+                app.vue.cur_pet_lost = "" + res.data.cur_pet_lost;
+                const cur_pet_lostfound_date_split = res.data.cur_pet_lostfound_date.split("-");
+                app.vue.cur_pet_lostfound_date_d = cur_pet_lostfound_date_split[2];
+                app.vue.cur_pet_lostfound_date_m = cur_pet_lostfound_date_split[1];
+                app.vue.cur_pet_lostfound_date_y = cur_pet_lostfound_date_split[0];
+                app.vue.cur_pet_description = res.data.cur_pet_description;
+                app.vue.cur_pet_lat = res.data.cur_pet_lat;
+                app.vue.cur_pet_lng = res.data.cur_pet_lng;
+                app.vue.cur_pet_lat_lng = app.vue.cur_pet_lat + ", " + app.vue.cur_pet_lng;
+                app.vue.upload_id = parseInt(res.data.cur_pet_photo);
+                app.vue.upload_id_temp = app.vue.upload_id;
+                app.location_preview();
+            }).then(axios.get(get_file_info_url)
+                .then(function (r) {
+                    app.vue.file_name = r.data.file_name;
+                    app.vue.file_type = r.data.file_type;
+                    app.vue.file_date = r.data.file_date;
+                    app.vue.file_path = r.data.file_path;
+                    app.vue.file_size = r.data.file_size;
+                    app.vue.download_url = r.data.download_url;
+                    app.vue.uploading = false;
+                    app.vue.deleting = false;
+                    app.vue.delete_confirmation = false;
+                    app.vue.preview_url = null;
+                    app.vue.temp_file_path = app.vue.file_path;
+                })
+            );
+        return -1;
+
     };
 
     // Call to the initializer.
