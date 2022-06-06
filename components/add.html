@@ -94,7 +94,7 @@
             <Label class="label">Photo upload (required, one photo only)</Label>
             <div class="field has-addons">
                 <p class="control">
-                  <div class="file is-info">
+                  <div class="file is-info" v-if="upload_id == -1">
                     <label class="file-label">
                       <input class="file-input" type="file" @change="upload_file($event)">
                       <span class="file-cta">
@@ -171,7 +171,7 @@
         </button>
     </div>
     <div v-if="post_success" class="notification is-success is-size-5">
-        Success! The posting for {{new_pet_name}} lost on {{new_pet_lostfound_date_m}}/{{new_pet_lostfound_date_d}}/{{new_pet_lostfound_date_y}} has been accepted.
+        Success! The posting for {{new_pet_name}} <span v-if="new_pet_lost == 'true'">lost</span><span v-else>found</span> on {{new_pet_lostfound_date_m}}/{{new_pet_lostfound_date_d}}/{{new_pet_lostfound_date_y}} has been accepted.
         <div style="margin-top: 5px;">
             <a href="[[=URL('main-page')]]" class="button is-info"><i class="fa fa-paw"></i>&ensp;Lost and Found Pets page</a>
         </div>
@@ -204,7 +204,6 @@
     </div>
 </div>
 [[block page_scripts]]
-<script src="js/add_pet.js"></script>
 <script>
    let add_post_url = "[[=XML(add_post_url)]]";
    let file_info_url = "[[=XML(file_info_url)]]";
@@ -212,4 +211,5 @@
    let notify_url = "[[=XML(notify_url)]]";
    let delete_url = "[[=XML(delete_url)]]";
 </script>
+<script src="js/add_pet.js"></script>
 [[end]]
