@@ -58,17 +58,24 @@
                             </div>
 
                             <div class="card-image">
-                                <img :src=row.pet.signed_url>
+                                <figure class="image">
+                                    <img style="width: 100%; height: 400px; object-fit: cover;" :src=row.pet.signed_url>
+                                </figure>
                             </div>
                             <div class="title">{{ row.pet.pet_name }}</div>
+
                             <div class="subtitle">
                                 <span class="icon">
                                     <i class="fa fa-fw fa-map-marker"></i>
                                 </span>
                                 {{ row.pet.pet_latlng_square }}
                             </div>
-                            <div v-if="row.show_details == true" class="content">
+                            <div v-if="row.show_details == true" class="content is-size-5">
                                 {{ row.pet.description }}
+                            </div>
+                            <div class="subtitle">
+                                <span class="is-size-6">Contact Information</span>
+
                             </div>
                         </div>
 
@@ -136,6 +143,7 @@
 <script>
   let load_posts_url = "[[=XML(load_posts_url)]]";
   let load_comments_url = "[[=XML(load_comments_url)]]";
+  let load_users_url = "[[=XML(load_users_url)]]";
   let add_comment_url = "[[=XML(add_comment_url)]]";
   let delete_comment_url = "[[=XML(delete_comment_url)]]";
   let edit_comment_url = "[[=XML(edit_comment_url)]]";

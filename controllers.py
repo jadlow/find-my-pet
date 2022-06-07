@@ -70,9 +70,11 @@ def index():
 def serve_main():
     pets = db(db.pet.user_email == db.auth_user.email).select()
     comments = db(db.comment).select()
+    users = db(db.user).select()
     return dict(
         load_posts_url=URL('load_posts', signer=url_signer),
         load_comments_url=URL('load_comments', signer=url_signer),
+        load_users_url=URL('load_users', signer=url_signer),
         add_comment_url=URL('add_comment', signer=url_signer),
         delete_comment_url=URL('delete_comment', signer=url_signer),
         edit_comment_url=URL('edit_comment', signer=url_signer),
@@ -102,6 +104,13 @@ def load_posts():
 def load_comments():
     comments = db(db.comment).select()
     return dict(comments=comments)
+
+
+@action('load_users')
+@action.uses(url_signer.verify(), db)
+def load_users():
+    users = db(db.auth_user).select()
+    return dict(users=users)
 
 
 @action('add_comment', method="POST")
@@ -245,6 +254,32 @@ def file_info():
         download_enabled=True,
     )
 
+@action('get_file_info/<photo_id:int>')
+@action.uses(url_signer.verify(), db)
+def get_file_info(photo_id = None):
+    """Returns to the web app the information about the file currently
+    uploaded, if any, so that the user can download it or replace it with
+    another file if desired."""
+    row = db(db.upload.id == photo_id).select().first()
+    # The file is present if the row is not None, and if the upload was
+    # confirmed.  Otherwise, the file has not been confirmed as uploaded,
+    # and should be deleted.
+    if row is None:
+        # There is no file.
+        row = {}
+    file_path = row.get('file_path')
+    return dict(
+        file_name=row.get('file_name'),
+        file_type=row.get('file_type'),
+        file_date=row.get('file_date'),
+        file_size=row.get('file_size'),
+        file_path=file_path,
+        download_url=None if file_path is None else gcs_url(GCS_KEYS, file_path),
+        # These two could be controlled to get other things done.
+        upload_enabled=True,
+        download_enabled=True,
+    )
+
 @action('obtain_gcs', method="POST")
 @action.uses(url_signer.verify(), db)
 def obtain_gcs():
@@ -369,11 +404,55 @@ def edit(pet_id=None):
         # Nothing found to be edited
         redirect(URL('index'))
     # Edit form: record initialized
-    form = Form(db.pet, record=p, deletable=False, csrf_session=session, formstyle=FormStyleBulma)
-    if form.accepted:
-        # The update already happened
-        redirect(URL('index'))
-    return dict(form=form)
+    return dict(
+        edit_post_url=URL("edit_post", str(pet_id), signer=url_signer),
+        get_pet_info_url=URL("get_pet_info", str(pet_id), signer=url_signer),
+        get_file_info_url=URL("get_file_info", str(p.photo), signer=url_signer),
+        url_signer=url_signer,
+        # GCS
+        file_info_url=URL('file_info', signer=url_signer),
+        obtain_gcs_url=URL('obtain_gcs', signer=url_signer),
+        notify_url=URL('notify_upload', signer=url_signer),
+        delete_url=URL('notify_delete', signer=url_signer)
+    )
+
+@action("get_pet_info/<pet_id:int>")
+@action.uses(db, session, auth.user, url_signer.verify())
+def get_pet_info(pet_id = None):
+    p = db.pet[pet_id]
+    if p is None:
+        redirect(URL("main-page"))
+    if p.user_email != get_user_email():
+        redirect(URL("main-page"))
+    return dict(
+        cur_pet_name = p.pet_name,
+        cur_pet_type = p.pet_type,
+        cur_pet_lost = p.pet_lost,
+        cur_pet_lostfound_date = p.pet_lostfound_date,
+        cur_pet_description = p.description,
+        cur_pet_lat = p.pet_lat,
+        cur_pet_lng = p.pet_lng,
+        cur_pet_photo = p.photo
+    )
+
+@action("edit_post/<pet_id:int>", method="POST")
+@action.uses(db, session, auth.user, url_signer.verify())
+def edit_post(pet_id=None):
+    p = db.pet[pet_id]
+    if p is None:
+        redirect(URL("main-page"))
+    if p.user_email != get_user_email():
+        redirect(URL("main-page"))
+    db(db.pet.id == pet_id).update(
+        pet_name = request.json.get("cur_pet_name"),
+        pet_type = request.json.get("cur_pet_type"),
+        pet_lost = request.json.get("cur_pet_lost"),
+        pet_lostfound_date = datetime.datetime(request.json.get("cur_pet_lostfound_date_y"), request.json.get("cur_pet_lostfound_date_m"), request.json.get("cur_pet_lostfound_date_d")),
+        description = request.json.get("cur_pet_description"),
+        pet_lat = request.json.get("cur_pet_lat"),
+        pet_lng = request.json.get("cur_pet_lng"),
+        photo = request.json.get("photo")
+    )
 
 
 @action('delete/<pet_id:int>')
