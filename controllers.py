@@ -207,7 +207,7 @@ def serve_add():
     )
 
 # Add a pet post controller, done by Chen W.
-@action("add_post", method=["GET", "POST"])
+@action("add_post", method="POST")
 @action.uses(db, session, auth.user, url_signer.verify())
 def add_post():
     db.pet.insert(
@@ -218,7 +218,7 @@ def add_post():
         description = request.json.get("new_pet_description"),
         pet_lat = request.json.get("new_pet_lat"),
         pet_lng = request.json.get("new_pet_lng"),
-        photo = request.json.get("photo"),
+        photo = request.json.get("photo")
     )
     return dict()
 
@@ -454,6 +454,43 @@ def edit_post(pet_id=None):
         photo = request.json.get("photo")
     )
 
+@action("get_pet_info/<pet_id:int>")
+@action.uses(db, session, auth.user, url_signer.verify())
+def get_pet_info(pet_id = None):
+    p = db.pet[pet_id]
+    if p is None:
+        redirect(URL("main-page"))
+    if p.user_email != get_user_email():
+        redirect(URL("main-page"))
+    return dict(
+        cur_pet_name = p.pet_name,
+        cur_pet_type = p.pet_type,
+        cur_pet_lost = p.pet_lost,
+        cur_pet_lostfound_date = p.pet_lostfound_date,
+        cur_pet_description = p.description,
+        cur_pet_lat = p.pet_lat,
+        cur_pet_lng = p.pet_lng,
+        cur_pet_photo = p.photo
+    )
+
+@action("edit_post/<pet_id:int>", method="POST")
+@action.uses(db, session, auth.user, url_signer.verify())
+def edit_post(pet_id=None):
+    p = db.pet[pet_id]
+    if p is None:
+        redirect(URL("main-page"))
+    if p.user_email != get_user_email():
+        redirect(URL("main-page"))
+    db(db.pet.id == pet_id).update(
+        pet_name = request.json.get("cur_pet_name"),
+        pet_type = request.json.get("cur_pet_type"),
+        pet_lost = request.json.get("cur_pet_lost"),
+        pet_lostfound_date = datetime.datetime(request.json.get("cur_pet_lostfound_date_y"), request.json.get("cur_pet_lostfound_date_m"), request.json.get("cur_pet_lostfound_date_d")),
+        description = request.json.get("cur_pet_description"),
+        pet_lat = request.json.get("cur_pet_lat"),
+        pet_lng = request.json.get("cur_pet_lng"),
+        photo = request.json.get("photo")
+    )
 
 @action('delete/<pet_id:int>')
 @action.uses(db, session, auth.user, url_signer.verify())

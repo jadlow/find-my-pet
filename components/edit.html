@@ -1,6 +1,217 @@
 [[extend 'layout.html']]
 
-<div class="section">
-    <h1 class="title">Edit a Post</h1>
-    [[=form]]
+<style>
+    [v-cloak] {
+         display: none;
+    }
+</style>
+
+<div class="section" id="vue-target-editpost" v-cloak>
+    <h1 class="title">Edit Post</h1>
+    <div v-if="!post_success">
+        <div class="field">
+            <label class="label">Name (required, if you do not know the name especially in the case you found the pet, please input "Don't Know")</label>
+            <div class="control">
+                <input type="text" class="input is-info" v-model="cur_pet_name">
+            </div>
+            <div class="has-text-danger" v-if="err_name">
+                Error {{err_name_i}}
+            </div>            
+        </div>
+        <div class="field">
+            <label class="label">Pet type (required)</label>
+            <div class="control">
+                <div class="select is-info">
+                    <select v-model="cur_pet_type">
+                        <option selected> </option>
+                        <option>Dog</option>
+                        <option>Cat</option>
+                        <option>Bird</option>
+                        <option>Rodent</option>
+                        <option>Reptile</option>
+                        <option>Rabbit</option>
+                        <option>Pet Livestock</option>
+                        <option>Aquatic</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="has-text-danger" v-if="err_type">
+                Error {{err_type_i}}
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Pet Lost/Found (required)</label>
+            <div class="control is-size-5">
+                <input type="radio" name="lorf" v-model="cur_pet_lost" value="true"> Lost&ensp;
+                <input type="radio" name="lorf" v-model="cur_pet_lost" value="false"> Found
+            </div>
+            <div class="has-text-danger" v-if="err_lost">
+                Error {{err_lost_i}}
+            </div>
+            <div class="has-text-grey">
+                <span v-if="cur_pet_lost == 'true'">
+                    If your pet has been lost, please search on this site to see whether or not someone else has found them.
+                </span>
+                <span v-if="cur_pet_lost == 'false'">
+                    If you have found a lost pet, please search on this site to see whether or not someone has posted they had lost the pet.
+                </span>
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Lost/Found Date (required)</label>
+            <div class="control">
+                <input type="number" class="input is-info" v-model="cur_pet_lostfound_date_m" min="1" max="12" placeholder="MM" style="width: 80px;">&ensp;/
+                <input type="number" class="input is-info" v-model="cur_pet_lostfound_date_d" min="1" max="31" placeholder="DD" style="width: 80px;">&ensp;/
+                <input type="number" class="input is-info" v-model="cur_pet_lostfound_date_y" min="2012" max="2022" placeholder="YYYY" style="width: 120px;">
+            </div>
+            <div class="has-text-danger" v-if="err_date">
+                Error {{err_date_i}}
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Description (required)</label>
+            <div class="control">
+                <textarea class="textarea is-info" v-model="cur_pet_description" id="in_description" @change="calc_description_length(); gen_description_rec()" @focus="gen_description_rec()" @input="calc_description_length(); gen_description_rec()" @keyup="calc_description_length(); gen_description_rec()" @paste="calc_description_length(); gen_description_rec()" @selectionchange="calc_description_length(); gen_description_rec()">
+                </textarea>
+            </div>
+            <div class="has-text-grey">
+                Recommended words:
+                <span v-for="word in description_rec_words">
+                    <div style="display: inline; margin-left: 3px; margin-right: 3px;">
+                        <button class="button is-light is-small" @click="put_description_rec({word})" style="text-decoration: underline;">{{word}}</button>
+                    </div>
+                </span>
+            </div>
+            <div class="has-text-danger" v-if="err_description">
+                Error {{err_description_i}}
+            </div>
+            <div class="has-text-grey" id="show_description_length">
+                <span style="color: #ff0000;"><i class="fa fa-pencil-square"></i></span>&ensp;0 characters inputted, excluding spaces (20 minimum requirement not reached)
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Photo upload (required, one photo only)</Label>
+            <div class="field has-addons">
+                <p class="control">
+                  <div class="file is-info" v-if="upload_id_temp == -1">
+                    <label class="file-label">
+                      <input class="file-input" type="file" @change="upload_file($event)">
+                      <span class="file-cta">
+                        <span class="file-icon">
+                          <i v-if="uploading" class="fa fa-spinner fa-pulse fa-fw"></i>
+                          <i v-else class="fa fa-upload fa-fw"></i>
+                        </span>
+                        <span class="file-label">
+                          <span v-if="!uploading">Upload photo</span>
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </p>
+                <p class="control">
+                  <button v-if="upload_id_temp != -1" class="button" @click="download_file"
+                          :class="{'disabled': !file_path}">
+                    <span class="icon" v-if="download_url">
+                      <i class="fa fa-download fa-fw"></i>
+                    </span>
+                    <span>{{file_info}}</span>
+                  </button>
+                  <button v-else class="button is-static">No photo uploaded</button>
+                </p>
+                <p class="control" v-if='temp_file_path'>
+                  <button class="button is-danger" @click="pseudo_delete_file" :class="{'is-loading': deleting}">
+                    <span v-if="delete_confirmation">Confirm deletion</span>
+                    <i v-else class="fa fa-trash"></i>
+                  </button>
+                </p>
+              </div>
+            <div>
+                
+            </div>
+            <div class="has-text-danger" v-if="err_photo_bad_type">
+                Error file extension not supported. Please upload a photo file of the extension
+                <span v-for="ext in photo_extensions">
+                    {{ext}}<span v-if="ext != photo_extensions[photo_extensions.length - 1]">,</span><span v-else>.</span>
+                    <span v-if="ext == photo_extensions[photo_extensions.length - 2]">or</span>
+                </span>
+            </div>
+            <div class="has-text-danger" v-if="err_photo_null">
+                Error no photo uploaded. Please upload a photo.
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Lost/Found Location Coordinates (required)</label>
+            <div class="control">
+                <input type="text" class="input is-info" v-model="cur_pet_lat_lng" @change="location_preview()" @input="location_preview()" @keyup="location_preview()" @paste="location_preview()">
+                <div style="margin-top: 3px;">
+                    <button class="button is-info" @click="show_get_coord_info = true"><i class="fa fa-info-circle"></i>&ensp;How to get coordinates</button>&ensp;
+                    <button class="button is-info" @click="current_location(); prg_geoloc = true"><i class="fa fa-map-pin"></i>&ensp;Get current location (permissions needed)</button>
+                </div>
+            </div>
+            <div class="has-text-danger" v-if="err_coord">
+                Error {{err_coord_i}}
+            </div>
+            <div class="has-text-grey" v-if="war_geoloc">
+                This site is not able to get your current location due to lack of permissions.
+            </div>
+            <div class="has-text-grey" v-if="prg_geoloc">
+                Retrieving current location...
+            </div>
+            <div class="is-size-5" style="margin-top: 5px;">
+                Preview of set location
+                <iframe src="https://maps.google.com/maps?output=embed" id="display_location" style="border: 3px solid #d00000; border-radius: 4px; height: 200px; width: 100%;"></iframe>
+                Zoom: <i class="fa fa-search-minus"></i>&ensp;<input type="range" class="range" min="1" max="18" v-model="location_preview_zoom" @change="location_preview()">&ensp;<i class="fa fa-search-plus"></i>
+            </div>
+        </div>
+        <button class="button is-link" @click="edit_post()">
+            Edit Pet&nbsp;
+            <span v-if="cur_pet_lost == 'true'">Lost</span>
+            <span v-else>Found</span>
+        </button>
+    </div>
+    <div v-if="post_success" class="notification is-success is-size-5">
+        Success! The posting for {{cur_pet_name}} <span v-if="cur_pet_lost == 'true'">lost</span><span v-else>found</span> on {{cur_pet_lostfound_date_m}}/{{cur_pet_lostfound_date_d}}/{{cur_pet_lostfound_date_y}} has been edited.
+        <div style="margin-top: 5px;">
+            <a href="[[=URL('main-page')]]" class="button is-info"><i class="fa fa-paw"></i>&ensp;Lost and Found Pets page</a>
+        </div>
+    </div>
+    <div class="modal is-active" v-if="show_get_coord_info">
+        <div class="modal-background" @click="show_get_coord_info = false"></div>
+        <div class="modal-content is-size-5">
+            <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
+                <button class="button is-danger" @click="show_get_coord_info = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="box">
+                To get the coordinates, please go to <a href="https://www.google.com/maps" target="_blank">Google Maps</a>.
+                Navigate to the location where the pet was lost or found.
+                Right-click directly on the location and select the coordinates which will be automatically copied.
+            </div>
+        </div>
+    </div>
+    <div class="modal is-active" v-if="err_main">
+        <div class="modal-background" @click="err_main = false"></div>
+        <div class="modal-content is-size-5">
+            <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
+                <button class="button is-danger" @click="err_main = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="box">
+                There has been an error with your submission information.
+                Please check the form's fields.
+                Note: Error checking is usually performed when the Report Pet button is clicked, not checked when the input fields' values are being changed, so the error messages may get outdated.
+            </div>
+        </div>
+    </div>
 </div>
+[[block page_scripts]]
+<script>
+   let edit_post_url = "[[=XML(edit_post_url)]]";
+   let get_pet_info_url = "[[=XML(get_pet_info_url)]]";
+   let get_file_info_url = "[[=XML(get_file_info_url)]]";
+   let file_info_url = "[[=XML(file_info_url)]]";
+   let obtain_gcs_url = "[[=XML(obtain_gcs_url)]]";
+   let notify_url = "[[=XML(notify_url)]]";
+   let delete_url = "[[=XML(delete_url)]]";
+</script>
+<script src="js/edit_pet.js"></script>
+[[end]]
