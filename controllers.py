@@ -189,7 +189,62 @@ def serve_map():
 @action("load_pins")
 @action.uses(db)
 def map_load_pins():
-    return dict()
+    print(request.params.get('status'))
+    print(request.params.get('radius'))
+    print(request.params.get('new_lat'))
+    print(request.params.get('new_lon'))
+
+    petlost = request.params.get('status') == "lost" 
+    pets = db((db.pet.pet_lost == petlost) & (db.pet.is_reunited == False)).select().as_list()
+
+    cur_lat = float(request.params.get('new_lat'))
+    cur_lon = float(request.params.get('new_lon'))
+    rad_mi = float(request.params.get('radius'))
+
+    nor_lat = 0
+    if(cur_lat + rad_mi/69 > 90):
+        excess_lat = cur_lat + rad_mi/69 - 90
+        nor_lat = 90 - excess_lat
+    else:
+        nor_lat = cur_lat + rad_mi/69
+
+    sou_lat = 0
+    if(cur_lat - rad_mi/69 < -90):
+        excess_lat = abs(cur_lat - rad_mi/69 + 90)
+        sou_lat = -90 +  excess_lat
+    else:
+        sou_lat = cur_lat - rad_mi/69
+
+    print(nor_lat)
+    print(sou_lat)
+
+    east_lon = 0
+    if(cur_lon + rad_mi/54.6 > 180):
+        excess_lon = cur_lon + rad_mi/54.6 - 180
+        east_lon = 180 - excess_lon
+    else:
+        east_lon = cur_lon + rad_mi/54.6
+
+    west_lon = 0
+    if(cur_lon - rad_mi/54.6 < -180):
+        excess_lon = abs(cur_lon - rad_mi/54.6 + 180)
+        west_lon = -180 +  excess_lat
+    else:
+        west_lon = cur_lon - rad_mi/54.6
+
+    print(east_lon)
+    print(west_lon)
+    #36.9557504  -122.0476928
+
+    petCoords = []     
+    for p in pets:
+        if( (p['pet_lat'] <= nor_lat) and (p['pet_lat'] >= sou_lat) and (p['pet_lng'] <= east_lon) and (p['pet_lng'] >= west_lon)):
+            petCoords.append(str(p['pet_lat']) + ", " + str(p['pet_lng']))
+
+    print(petCoords)
+    return dict(
+        petArr = petCoords,
+    )
 
 @action('settings')
 @action.uses('../components/settings.html', db, session, auth.user, url_signer)
