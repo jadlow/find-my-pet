@@ -181,13 +181,40 @@ def map_load_pins():
     return dict()
 
 @action('settings')
-@action.uses('../components/settings.html', db, session, auth.user)
+@action.uses('../components/settings.html', db, session, auth.user, url_signer)
 def serve_settings():
-    form = Form(db.user, csrf_session=session, formstyle=FormStyleBulma)
-    if form.accepted:
-        redirect(URL('../components/settings.html'))
+    return dict(
+        settings_url=URL("settings", signer=url_signer),
+        url_signer=url_signer,
+        file_info_url=URL('file_info', signer=url_signer),
+        obtain_gcs_url=URL('obtain_gcs', signer=url_signer),
+        notify_url=URL('notify_upload', signer=url_signer),
+        delete_url=URL('notify_delete', signer=url_signer),
+    )
 
-    return dict(form=form)
+
+@action('user_settings', method=["GET", "POST"])
+@action.uses(db, session, auth.user, url_signer)
+def settings():
+    user = db(db.user.user_email == db.auth_user.email).select()
+    db.user.insert(
+        photo = request.json.get("photo"),
+        first_name = request.json.get("first_name"),
+        last_name = request.json.get("last_name"),
+        email = request.json.get("email"),
+        phone_num = request.json.get("phone_num"),
+        radius = request.json.get("radius"),
+        coordinates = request.json.get("coordinates"),
+        latitude = request.json.get("latitude"),
+        longitude = request.json.get("longitude"),
+        location = request.json.get("location")
+    )
+
+    return dict(
+        current_user_email=get_user_email(),
+        user=user,
+        url_signer=url_signer
+    )
 
 
 # PETS
