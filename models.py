@@ -62,6 +62,7 @@ db.define_table('user',
                 Field('coordinates', 'string'),  # This is the ~1KM square. (latlngsquare)
                 Field('latitude', 'double'),
                 Field('longitude', 'double'),
+                # Field('auth', 'reference auth_user')
                 )
 
 
