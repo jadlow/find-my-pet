@@ -52,17 +52,12 @@ db.define_table('comment',
 db.comment.id.readable = db.comment.id.writable = False
 
 db.define_table('user',
-                # Field('auth_user_id', 'reference auth_user'),
-                Field('photo', 'upload'),  # This contains the image URL, see Unit 18
-                Field('first_name', 'string'),
-                Field('last_name', 'string'),
-                Field('email', defaut=get_user_email),
+                Field('auth_user_id', 'reference auth_user'),
+                Field('username', 'string'),
                 Field('phone_num', 'integer', requires=IS_NOT_EMPTY()),
                 Field('radius', 'integer', default=1),
-                Field('coordinates', 'string'),  # This is the ~1KM square. (latlngsquare)
-                Field('latitude', 'double'),
-                Field('longitude', 'double'),
-                # Field('auth', 'reference auth_user')
+                Field('latitude', 'double', requires=IS_NOT_EMPTY()),
+                Field('longitude', 'double', requires=IS_NOT_EMPTY()),
                 )
 
 
