@@ -19,6 +19,7 @@ let init = (app) => {
         pet_type: "Select Pet Type",
         coord_inv: false,
         error_message: "",
+        show_get_coord_info: false,
     };
 
     app.enumerate = (a) => {
