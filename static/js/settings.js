@@ -417,10 +417,18 @@ let init = (app) => {
         );
     };
 
+    app.get_user_info = function(){
+        axios.get(get_user_info_url)
+            .then(function(res){
+                app.vue.first_name = res.data.first_name;
+            });
+    };
+
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
         settings: app.settings,
+        get_user_info: app.get_user_info,
         location_preview: app.location_preview,
         current_location: app.current_location,
         // GCS
@@ -444,14 +452,35 @@ let init = (app) => {
     app.init = () => {
         // Put here any initialization code.
         // Typically this is a server GET call to load the data.
-        const today = new Date();
-        app.vue.new_pet_lostfound_date_m = String(today.getMonth() + 1).padStart(2, "0");
-        app.vue.new_pet_lostfound_date_d = String(today.getDate()).padStart(2, "0");
-        app.vue.new_pet_lostfound_date_y = today.getFullYear();
-        axios.get(file_info_url)
-            .then(function (r) {
-                app.set_result(r);
-            });
+        axios.get(get_user_info_url)
+            .then(function(res){
+                app.vue.first_name = res.data.first_name;
+                app.vue.last_name = res.data.last_name;
+                app.vue.email = res.data.email;
+                app.vue.phone_num = res.data.phone_num;
+                app.vue.radius = res.data.radius;
+                app.vue.coordinates = res.data.coordinates;
+                // app.vue.latitude = res.data.latitude;
+                // app.vue.longitude = res.data.longitude;
+                app.vue.upload_id = parseInt(res.data.photo);
+                app.vue.upload_id_temp = app.vue.upload_id;
+                app.location_preview();
+            }).then(axios.get(get_file_info_url)
+                .then(function (r) {
+                    app.vue.file_name = r.data.file_name;
+                    app.vue.file_type = r.data.file_type;
+                    app.vue.file_date = r.data.file_date;
+                    app.vue.file_path = r.data.file_path;
+                    app.vue.file_size = r.data.file_size;
+                    app.vue.download_url = r.data.download_url;
+                    app.vue.uploading = false;
+                    app.vue.deleting = false;
+                    app.vue.delete_confirmation = false;
+                    app.vue.preview_url = null;
+                    app.vue.temp_file_path = app.vue.file_path;
+                })
+            );
+        return -1;
     };
 
     // Call to the initializer.
