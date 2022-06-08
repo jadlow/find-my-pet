@@ -57,6 +57,7 @@ gcs = NQGCS(json_key_path=GCS_KEY_PATH)
 @action('index')
 @action.uses('index.html', db, auth, url_signer)
 def index():
+    redirect('main-page')
     pets = db(db.pet).select()
     comments = db(db.comment).select()
     return dict(
@@ -185,6 +186,18 @@ def serve_howto():
 @action("map")
 @action.uses("../components/map.html", url_signer)
 def serve_map():
+    # makes sure user is logged in before accessing website
+    if get_user_email() is None:
+        redirect(URL('auth', 'login'))
+    auth_users = db(db.auth_user.email == get_user_email).select()
+    users = db(db.user).select()
+    user_created = False
+    for auth_user in auth_users:
+        for user in users:
+            if user.auth_user_id == auth_user.id:
+                user_created = True
+    if user_created is False:
+        redirect(URL('settings'))
     return dict(
         load_pins_url=URL('load_pins', signer=url_signer),
         url_signer=url_signer
@@ -314,6 +327,18 @@ def user_settings():
 @action("add")
 @action.uses("../components/add.html", db, session, auth.user, url_signer)
 def serve_add():
+    # makes sure user is logged in before accessing website
+    if get_user_email() is None:
+        redirect(URL('auth', 'login'))
+    auth_users = db(db.auth_user.email == get_user_email).select()
+    users = db(db.user).select()
+    user_created = False
+    for auth_user in auth_users:
+        for user in users:
+            if user.auth_user_id == auth_user.id:
+                user_created = True
+    if user_created is False:
+        redirect(URL('settings'))
     return dict(
         add_post_url=URL("add_post", signer=url_signer),
         url_signer=url_signer,
@@ -522,10 +547,10 @@ def edit(pet_id=None):
     # We read the product being edited from the db.
     p = db.pet[pet_id]
     if p.user_email != get_user_email():
-        redirect(URL('index'))
+        redirect(URL('main-page'))
     if p is None:
         # Nothing found to be edited
-        redirect(URL('index'))
+        redirect(URL('main-page'))
     # Edit form: record initialized
     return dict(
         edit_post_url=URL("edit_post", str(pet_id), signer=url_signer),
