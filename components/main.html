@@ -6,7 +6,7 @@
 }
 </style>
 
-<div class="section" id="vue-target" v-cloak>
+<div class="section has-background-grey-light" id="vue-target" v-cloak>
     <div class="tile is-ancestor">
         <div class="tile is-parent is-3 is-vertical">
             <div class="box">
@@ -49,14 +49,10 @@
                     <div class="box">
                         <div class="block is-mobile">
 
-                            <!--Maximize and minimize functionality-->
-                            <div class="columns">
-                                <div class="column" v-if="row.show_details == false" @click="show_details(row._idx, true)">
-                                <i class="fa fa-window-maximize has-text-info has-text-right"></i>
-                                </div>
-                                <div class="column" v-if="row.show_details == true" @click="show_details(row._idx, false)">
-                                    <i class="fa fa-window-minimize has-text-info has-text-right"></i>
-                                </div>
+                            <!--Post Header-->
+                            <div class="columns is-size-4">
+                                <div class="column"></div>
+                                <div class="column is-size-3 has-text-centered mg-small">{{ row.pet.pet_name }}</div>
                                 <div class="column has-text-right" v-if="row.pet.user_email == '[[=current_user_email]]'">
                                     <a :href="row.edit_url">
                                         <i class="fa fa-fw fa-pencil"></i>
@@ -65,47 +61,55 @@
                                         <i class="fa fa-fw fa-trash"></i>
                                     </a>
                                 </div>
-                            </div>
-
-                            <div class="card-image">
-                                <figure class="image">
-                                    <img style="width: 100%; height: 400px; object-fit: cover;" :src=row.pet.signed_url>
-                                </figure>
-                            </div>
-                            <div class="title">{{ row.pet.pet_name }}</div>
-
-                            <div class="subtitle">
-                                <span class="icon">
-                                    <i class="fa fa-fw fa-map-marker"></i>
-                                </span>
-                                <a :href="row.map_url">
-                                    {{ row.pet.pet_lat }},
-                                    {{ row.pet.pet_lng }}
-                                </a>
-                            </div>
-                            <div v-if="row.show_details == true" class="content is-size-5">
-                                {{ row.pet.description }}
-                            </div>
-                        </div>
-
-                        <!--Display Comments Section-->
-                        <div class="block" v-if="row.show_details == true">
-                            <div class="subtitle">
-                                <span class="is-size-6">Contact Information</span>
-                                <div v-for="user in users">
-                                    <div v-if="user.email == row.pet.user_email">
-                                        {{ row.pet.user_email }}
-                                    </div>
+                                <div class="column has-text-right" v-else>
                                 </div>
                             </div>
-                            <div v-for="comment in comments">
-                            <div v-if="comment.pet_id == row.pet.id">
-                                <div class="box">
-                                    <div class="columns container">
-                                        <div class="column">
+
+                            <!--Post Image Display-->
+                            <figure class="image">
+                                <img style="border-radius:4px; width: 100%; height: 400px; object-fit: contain;" :src=row.pet.signed_url>
+                            </figure>
+                            <br>
+                            <!--Location Display-->
+                            <iframe width="100%" :src="row.map_display_url" style=" border-radius: 4px; height: 200px; width: 100%;"></iframe>
+                            <div class="columns is-size-5">
+                                <div class="column">
+                                    <a :href="row.map_url">
+                                        <i class="fa fa-fw fa-map-marker"></i>
+                                        {{ row.pet.pet_lat }},
+                                        {{ row.pet.pet_lng }}
+                                    </a>
+                                </div>
+                                <div class="column has-text-danger has-text-right">
+                                    Lost on: {{ row.pet.pet_lostfound_date }}
+                                </div>
+                            </div>
+
+                            <!--Maximize Post-->
+                            <div class="is-size-2 has-text-centered" v-if="row.show_details == false" @click="show_details(row._idx, true)">
+                                <i class="fa fa-angle-down has-text-info"></i>
+                            </div>
+
+                            <!--Display Comments Section-->
+                            <div class="block" v-if="row.show_details == true">
+                                <div class="subtitle">
+                                    <div class="content is-size-5">
+                                        {{ row.pet.description }}
+                                    </div>
+                                    <span class="is-size-5 has-text-info-dark">Contact Information</span>
+                                    <div class="is-size-6" v-for="user in users">
+                                        <div v-if="user.email == row.pet.user_email">
+                                            <span class="is-size-5">{{ row.contact_name }}</span> <br>
+                                            <i class="fa fa-envelope has-text-info-dark"></i> {{ row.pet.user_email }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-for="comment in comments">
+                                    <div v-if="comment.pet_id == row.pet.id">
+                                        <div class="box">
                                             <div v-if="comment.user_email == '[[=current_user_email]]'">
                                                 <div class="control" :class="{'is-loading': comment._state === 'pending'}">
-                                                    <input type="text" class="input" v-model="comment.post_text"
+                                                    <textarea class="textarea" rows="2" style="resize: vertical" v-model="comment.post_text"
                                                             :class="{
                                                                 'is-focused': comment._state === 'edit',
                                                                 'is-static': comment._state === 'clean',
@@ -113,45 +117,48 @@
                                                            :readonly="comment._state === 'clean'"
                                                            @click="start_edit(comment._idx)"
                                                            @blur="stop_edit(comment._idx)"
-                                                    >
+                                                    ></textarea>
                                                 </div>
                                             </div>
                                             <div v-if="comment.user_email != '[[=current_user_email]]'">
                                                 {{ comment.post_text }}
                                             </div>
-                                            <br>
-                                            <span class="is-size-7 has-text-grey">
-                                                {{ comment.post_date }}
-                                            </span>
+                                            <div class="columns container">
+                                                <div class="column is-size-4">
+                                                    <span v-if="comment.user_email == '[[=current_user_email]]'" @click="delete_comment(comment._idx)">
+                                                        <i class="fa fa-trash has-text-danger"></i>
+                                                    </span>
+                                                </div>
+                                                <div class="column has-text-right">
+                                                    {{ comment.user_email }}
+                                                    <br>
+                                                    <span class="is-size-7 has-text-grey">
+                                                        {{ comment.post_date }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="column has-text-right">
-                                            {{ comment.user_email }}
-                                            <br>
-                                            <span v-if="comment.user_email == '[[=current_user_email]]'" @click="delete_comment(comment._idx)">
-                                                <i class="fa fa-trash has-text-danger"></i>
-                                            </span>
-                                        </div>
+                                        <div class="subtitle"></div>
                                     </div>
                                 </div>
                             </div>
-                            </div>
-                        </div>
 
-                        <!--Display Comment Input-->
-                        <div v-if="row.show_details == true" class="form columns">
-                          <div class="field">
-                            <div class="control column">
-                              <input type="text" v-model="row.add_comment_content" class="input" placeholder="add comment...">
+                            <!--Display Comment Input-->
+                            <div v-if="row.show_details == true" class="columns">
+                                <div class="control column is-three-quarters">
+                                  <input type="text" v-model="row.add_comment_content" class="input" placeholder="add comment...">
+                                </div>
+                                <div class="control column has-text-centered is-one-quarter">
+                                  <input type="submit" @click="add_comment(row._idx)" value="Comment" class="button is-primary">
+                                </div>
                             </div>
-                          </div>
-                          <div class="field column">
-                            <div class="control">
-                              <input type="submit" @click="add_comment(row._idx)" value="Post" class="button is-primary">
-                            </div>
-                          </div>
-                        </div>
 
+                            <!--Minimize Post-->
+                            <div class="is-size-2 has-text-centered" v-if="row.show_details == true" @click="show_details(row._idx, false)">
+                                <i class="fa fa-angle-up has-text-info"></i>
+                            </div>
                     </div>
+                </div>
                 </div>
         </div>
     </div>
