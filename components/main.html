@@ -89,82 +89,86 @@
                                     Lost on: {{ row.pet.pet_lostfound_date }}
                                 </div>
                             </div>
-
-                            <!--Maximize Post-->
-                            <div class="is-size-2 has-text-centered" v-if="row.show_details == false" @click="show_details(row._idx, true)">
-                                <i class="fa fa-angle-down has-text-info"></i>
-                            </div>
-
-                            <!--Display Comments Section-->
-                            <div class="block" v-if="row.show_details == true">
-                                <div class="subtitle">
-                                    <div class="content is-size-5">
-                                        {{ row.pet.description }}
-                                    </div>
-                                    <span class="is-size-5 has-text-info-dark">Contact Information</span>
-                                    <div class="is-size-6" v-for="user in users">
-                                        <div v-if="user.email == row.pet.user_email">
-                                            <span class="is-size-5">{{ row.contact_name }}</span> <br>
-                                            <i class="fa fa-envelope has-text-info-dark"></i> {{ row.pet.user_email }}
-                                        </div>
+                        </div>
+                        <!--Maximize Post-->
+                        <div class="is-size-2 has-text-centered" v-if="row.show_details == false" @click="show_details(row._idx, true)">
+                            <i class="fa fa-angle-down has-text-info"></i>
+                        </div>
+                        <!--Display Comments Section-->
+                        <div class="block" v-if="row.show_details == true">
+                            <div class="subtitle">
+                                <div class="content is-size-5">
+                                    {{ row.pet.description }}
+                                </div>
+                                <span class="is-size-5 has-text-info-dark">Contact Information</span>
+                                <div class="is-size-6" v-for="user in users">
+                                    <div v-if="user.email == row.pet.user_email">
+                                        <span class="is-size-5">{{ row.contact_name }}</span> <br>
+                                        <i class="fa fa-envelope has-text-info-dark"></i> {{ row.pet.user_email }}
                                     </div>
                                 </div>
-                                <div v-for="comment in comments">
-                                    <div v-if="comment.pet_id == row.pet.id">
-                                        <div class="box">
-                                            <div v-if="comment.user_email == '[[=current_user_email]]'">
-                                                <div class="control" :class="{'is-loading': comment._state === 'pending'}">
-                                                    <textarea class="textarea" rows="2" style="resize: vertical" v-model="comment.post_text"
-                                                            :class="{
-                                                                'is-focused': comment._state === 'edit',
-                                                                'is-static': comment._state === 'clean',
-                                                            }"
-                                                           :readonly="comment._state === 'clean'"
-                                                           @click="start_edit(comment._idx)"
-                                                           @blur="stop_edit(comment._idx)"
-                                                    ></textarea>
-                                                </div>
+                            </div>
+                            <div v-for="comment in comments">
+                                <div v-if="comment.pet_id == row.pet.id">
+                                    <div class="box">
+                                        <div v-if="comment.user_email == '[[=current_user_email]]'">
+                                            <div class="control" :class="{'is-loading': comment._state === 'pending'}">
+                                                <textarea class="textarea" rows="2" style="resize: vertical" v-model="comment.post_text"
+                                                        :class="{
+                                                            'is-focused': comment._state === 'edit',
+                                                            'is-static': comment._state === 'clean',
+                                                        }"
+                                                       :readonly="comment._state === 'clean'"
+                                                       @click="start_edit(comment._idx)"
+                                                       @blur="stop_edit(comment._idx)"
+                                                ></textarea>
                                             </div>
-                                            <div v-if="comment.user_email != '[[=current_user_email]]'">
-                                                {{ comment.post_text }}
+                                        </div>
+                                        <div v-if="comment.user_email != '[[=current_user_email]]'">
+                                            {{ comment.post_text }}
+                                        </div>
+                                        <div class="columns container">
+                                            <div class="column is-size-4">
+                                                <span v-if="comment.user_email == '[[=current_user_email]]'" @click="delete_comment(comment._idx)">
+                                                    <i class="fa fa-trash has-text-danger"></i>
+                                                </span>
                                             </div>
-                                            <div class="columns container">
-                                                <div class="column is-size-4">
-                                                    <span v-if="comment.user_email == '[[=current_user_email]]'" @click="delete_comment(comment._idx)">
-                                                        <i class="fa fa-trash has-text-danger"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="column has-text-right">
-                                                    {{ comment.user_email }}
-                                                    <br>
-                                                    <span class="is-size-7 has-text-grey">
-                                                        {{ comment.post_date }}
-                                                    </span>
-                                                </div>
+                                            <div class="column has-text-right">
+                                                {{ comment.user_email }}
+                                                <br>
+                                                <span class="is-size-7 has-text-grey">
+                                                    {{ comment.post_date }}
+                                                </span>
                                             </div>
                                         </div>
                                         <div class="subtitle"></div>
                                     </div>
+                                    <div class="subtitle"></div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!--Display Comment Input-->
-                            <div v-if="row.show_details == true" class="columns">
-                                <div class="control column is-three-quarters">
-                                  <input type="text" v-model="row.add_comment_content" class="input" placeholder="add comment...">
-                                </div>
-                                <div class="control column has-text-centered is-one-quarter">
-                                  <input type="submit" @click="add_comment(row._idx)" value="Comment" class="button is-primary">
-                                </div>
+                        <!--Display Comment Input-->
+                        <div v-if="row.show_details == true" class="columns">
+                            <div class="control column is-three-quarters">
+                              <input type="text" v-model="row.add_comment_content" class="input" placeholder="add comment...">
                             </div>
+                            <div class="control column has-text-centered is-one-quarter">
+                              <input type="submit" @click="add_comment(row._idx)" value="Comment" class="button is-primary">
+                            </div>
+                        </div>
+                        <!--Minimize Post-->
+                        <div class="is-size-2 has-text-centered" v-if="row.show_details == true" @click="show_details(row._idx, false)">
+                            <i class="fa fa-angle-up has-text-info"></i>
+                        </div>
 
                             <!--Minimize Post-->
                             <div class="is-size-2 has-text-centered" v-if="row.show_details == true" @click="show_details(row._idx, false)">
                                 <i class="fa fa-angle-up has-text-info"></i>
                             </div>
                     </div>
-                </div>
-                </div>
+               </div>
+            </div>
         </div>
     </div>
 </div>
