@@ -44,7 +44,7 @@ let init = (app) => {
     };
 
     app.add_comment = function (pet_idx) {
-        let row = app.vue.pets[pet_idx];
+        let row = app.vue.pets.filter(x => x.pet.id==pet_idx)[0];
         axios.post(add_comment_url,
             {
                 pet_id: row.pet.id,
@@ -79,8 +79,8 @@ let init = (app) => {
     };
 
     app.show_details = function (pet_idx, details_status) {
-        let petwant = app.vue.pets.filter(x => x.pet.id==pet_idx);
-        petwant[0].show_details = details_status;
+        let pet = app.vue.pets.filter(x => x.pet.id==pet_idx)[0];
+        pet.show_details = details_status;
     };
 
     app.start_edit = function (comment_idx) {
@@ -106,7 +106,7 @@ let init = (app) => {
     };
 
     app.reset_form = function (pet_idx) {
-        let pet = app.vue.pets[pet_idx];
+        let pet = app.vue.pets.filter(x => x.pet.id==pet_idx)[0];
         pet.add_comment_content = "";
     };
 

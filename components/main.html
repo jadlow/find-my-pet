@@ -152,7 +152,7 @@
                               <input type="text" v-model="row.add_comment_content" class="input" placeholder="add comment...">
                             </div>
                             <div class="control column has-text-centered is-one-quarter">
-                              <input type="submit" @click="add_comment(row._idx)" value="Comment" class="button is-primary">
+                              <input type="submit" @click="add_comment(row.pet.id)" value="Comment" class="button is-primary">
                             </div>
                         </div>
                         <!--Minimize Post-->
