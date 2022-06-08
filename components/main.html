@@ -67,9 +67,8 @@
                         <div class="block is-mobile">
 
                             <!--Post Header-->
-                            <div class="columns is-size-4">
-                                <div class="column"></div>
-                                <div class="column is-size-3 has-text-centered mg-small">{{ row.pet.pet_name }}</div>
+                            <div class="columns">
+                                <div class="column is-four-fifths has-text-centered mg-small" style="word-break:break-word;font-size: 25px;font-weight: 600;">{{ row.pet.pet_name }}</div>
                                 <div class="column has-text-right" v-if="row.pet.user_email == '[[=current_user_email]]'">
                                     <a :href="row.edit_url">
                                         <i class="fa fa-fw fa-pencil"></i>
@@ -77,8 +76,6 @@
                                     <a class="has-text-danger" :href="row.delete_url">
                                         <i class="fa fa-fw fa-trash"></i>
                                     </a>
-                                </div>
-                                <div class="column has-text-right" v-else>
                                 </div>
                             </div>
 
