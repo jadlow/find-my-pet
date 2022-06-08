@@ -44,7 +44,7 @@ let init = (app) => {
     app.data = {
         // Complete as you see fit.
         post_success: false,
-        username: "",
+        first_name: "",
         last_name: "",
         email: "",
         phone_num: "",
@@ -52,6 +52,7 @@ let init = (app) => {
         coordinates: "",
         latitude: "",
         longitude: "",
+        new_pet_lat_lng: "",
         err_main: false,
         err_first_name: false,
         err_first_name_i: "",
@@ -90,40 +91,19 @@ let init = (app) => {
         app.vue.err_phone_num = false;
         app.vue.err_radius = false;
         app.vue.err_coordinates = false;
-        app.vue.err_photo_null = false;
-        app.vue.err_photo_bad_type = false;
         app.vue.err_coord = false;
         app.vue.war_geoloc = false;
         
         // Check name.
         if(app.vue.first_name.replace(/\s/g, "").length == 0) {
-            app.vue.err_first_name_i = "Empty first name. Please specify a first name that contains 1 or more characters."
+            app.vue.err_first_name_i = "Empty username. Please specify a username that contains 1 or more characters."
             app.vue.err_first_name = true;
-            app.vue.err_main = true;
-            return -1;
-        }
-
-        if(app.vue.last_name.replace(/\s/g, "").length == 0) {
-            app.vue.err_last_name_i = "Empty last name. Please specify a last name that contains 1 or more characters."
-            app.vue.err_last_name = true;
             app.vue.err_main = true;
             return -1;
         }
 
         if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(app.vue.email)) {
             app.vue.err_email_i = "Invalid email."
-        }
-
-        let new_pet_lost_bool = true;
-        if(app.vue.new_pet_lost == "false"){
-            new_pet_lost_bool = false;
-        }
-
-        // Check photo
-        if(app.vue.file_name == null || app.vue.file_name == ""){
-            app.vue.err_photo_null = true;
-            app.vue.err_main = true;
-            return -1;
         }
 
         // Check coordinates.
@@ -170,7 +150,7 @@ let init = (app) => {
         }
 
         // Everything alright, add entry.
-        axios.post(add_post_url,
+        axios.post(settings_url,
             {
                 first_name: app.vue.first_name,
                 last_name: app.vue.last_name,
@@ -211,7 +191,7 @@ let init = (app) => {
         app.vue.war_geoloc = false;
         navigator.geolocation.getCurrentPosition(
             function(pos_obj){
-                app.vue.coordinates = pos_obj.coordinates.latitude + ", " + pos_obj.coordinates.longitude;
+                app.vue.coordinates = pos_obj.coords.latitude + ", " + pos_obj.coords.longitude;
                 app.vue.prg_geoloc = false;
                 app.location_preview();
             },
@@ -236,8 +216,6 @@ let init = (app) => {
         el: "#vue-target-settings",
         data: app.data,
         methods: app.methods,
-        // GCS
-        computed: app.computed,
     });
 
     // And this initializes it.
@@ -248,6 +226,16 @@ let init = (app) => {
         app.vue.new_pet_lostfound_date_m = String(today.getMonth() + 1).padStart(2, "0");
         app.vue.new_pet_lostfound_date_d = String(today.getDate()).padStart(2, "0");
         app.vue.new_pet_lostfound_date_y = today.getFullYear();
+        axios.get(load_user_settings_url)
+            .then(function(res){
+                app.vue.first_name = res.data.username;
+                app.vue.phone_num = res.data.phone_num;
+                app.vue.radius = res.data.radius;
+                app.vue.latitude = res.data.latitude;
+                app.vue.longitude = res.data.longitude;
+                app.vue.coordinates = app.vue.latitude + ", " + app.vue.longitude;
+                app.location_preview();
+            });
     };
 
     // Call to the initializer.

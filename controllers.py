@@ -71,12 +71,15 @@ def serve_main():
     # makes sure user is logged in before accessing website
     if get_user_email() is None:
         redirect(URL('auth', 'login'))
-    user = db(db.user.email == get_user_email()).select()
-    if user:
-        print("exists")
-    else:
-        print("DNE")
-    print(user)
+    auth_users = db(db.auth_user.email == get_user_email).select()
+    users = db(db.user).select()
+    user_created = False
+    for auth_user in auth_users:
+        for user in users:
+            if user.auth_user_id == auth_user.id:
+                user_created = True
+    if user_created is False:
+        redirect(URL('settings'))
     return dict(
         load_posts_url=URL('load_posts', signer=url_signer),
         load_comments_url=URL('load_comments', signer=url_signer),
@@ -94,7 +97,7 @@ def serve_main():
 @action.uses(url_signer.verify(), db)
 def load_posts():
     rows = db(db.pet.user_email == db.auth_user.email).select(orderby=~db.pet.creation_date)
-    users = db(db.auth_user).select()
+    users = db(db.user).select()
     for row in rows:
         u_row = db(db.upload.id == row.pet.photo).select().as_list()
         file_path = u_row[0]['file_path']
@@ -104,8 +107,8 @@ def load_posts():
         row['map_display_url'] = "https://google.com/maps?q=" + str(row.pet.pet_lat) + "," + str(row.pet.pet_lng) + "&z=12&output=embed"
         row.pet["signed_url"] = None if file_path is None else gcs_url(GCS_KEYS, file_path, verb='GET')
         for user in users:
-            if user.email == row.pet.user_email:
-                row['contact_name'] = user.first_name + " " + user.last_name
+            if user.auth_user_id.email == row.pet.user_email:
+                row['contact_name'] = user.username
     li = rows.as_list()
     return dict(pets=li)
 
@@ -176,6 +179,7 @@ def serve_about():
 def serve_howto():
     return dict()
 
+
 # Map page load controller, done by Chen W.
 @action("map")
 @action.uses("../components/map.html", url_signer)
@@ -184,6 +188,7 @@ def serve_map():
         load_pins_url=URL('load_pins', signer=url_signer),
         url_signer=url_signer
     )
+
 
 # Map load pins controller, done by Chen W.
 @action("load_pins")
@@ -246,21 +251,51 @@ def map_load_pins():
         petArr = petCoords,
     )
 
+
 @action('settings')
 @action.uses('../components/settings.html', db, session, auth.user, url_signer)
-def serve_settings():
+def settings():
     return dict(
-        settings_url=URL("settings", signer=url_signer),
+        settings_url=URL("user_settings", signer=url_signer),
+        load_user_settings_url=URL("load_user_settings", signer=url_signer),
         url_signer=url_signer,
     )
 
 
+@action('load_user_settings', method=["GET"])
+@action.uses(db, session, auth.user, url_signer)
+def load_user_settings():
+    rows = db(db.user.auth_user_id == db.auth_user.id).select()
+    user = None
+    for row in rows:
+        if row.auth_user.email == get_user_email():
+            user = row.user
+    if user is not None:
+        return dict(
+            username=user.username,
+            phone_num=user.phone_num,
+            radius=user.radius,
+            latitude=user.latitude,
+            longitude=user.longitude
+        )
+    else:
+        return dict(
+            username="",
+            phone_num="",
+            radius="",
+            latitude="",
+            longitude=""
+        )
+
+
 @action('user_settings', method=["GET", "POST"])
 @action.uses(db, session, auth.user, url_signer)
-def settings():
-    user = db(db.user.user_email == db.auth_user.email).select()
-    db.user.insert(
-        user_name = request.json.get("first_name"),
+def user_settings():
+    auth_user_id = db(db.auth_user.email == get_user_email()).select().first()
+    db.user.update_or_insert(
+        db.user.auth_user_id == auth_user_id,
+        auth_user_id = auth_user_id,
+        username = request.json.get("first_name"),
         phone_num = request.json.get("phone_num"),
         radius = request.json.get("radius"),
         latitude = request.json.get("latitude"),
@@ -268,7 +303,6 @@ def settings():
     )
     return dict(
         current_user_email=get_user_email(),
-        user=user,
         url_signer=url_signer
     )
 
@@ -289,6 +323,7 @@ def serve_add():
         delete_url=URL('notify_delete', signer=url_signer),
     )
 
+
 # Add a pet post controller, done by Chen W.
 @action("add_post", method="POST")
 @action.uses(db, session, auth.user, url_signer.verify())
@@ -304,6 +339,7 @@ def add_post():
         photo = request.json.get("photo"),
     )
     return dict()
+
 
 @action('file_info')
 @action.uses(url_signer.verify(), db)
@@ -337,6 +373,7 @@ def file_info():
         download_enabled=True,
     )
 
+
 @action('get_file_info/<photo_id:int>')
 @action.uses(url_signer.verify(), db)
 def get_file_info(photo_id = None):
@@ -362,6 +399,7 @@ def get_file_info(photo_id = None):
         upload_enabled=True,
         download_enabled=True,
     )
+
 
 @action('obtain_gcs', method="POST")
 @action.uses(url_signer.verify(), db)
@@ -394,6 +432,7 @@ def obtain_gcs():
                 return dict(signed_url=signed_url)
         # Otherwise, we return no URL, so we don't authorize the deletion.
         return dict(signer_url=None)
+
 
 @action('notify_upload', method="POST")
 @action.uses(url_signer.verify(), db)

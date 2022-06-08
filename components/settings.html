@@ -60,7 +60,7 @@
             Zoom: <i class="fa fa-search-minus"></i>&ensp;<input type="range" class="range" min="1" max="18" v-model="location_preview_zoom" @change="location_preview()">&ensp;<i class="fa fa-search-plus"></i>
          </div>
       </div>
-      <button class="button is-link" @click="add_post()">Save Changes</button>
+      <button class="button is-success" @click="settings()">Save Changes</button>
    </div>
 
    <div v-if="post_success" class="notification is-success is-size-5">
@@ -94,8 +94,9 @@
 </div>
 
 [[block page_scripts]]
-<script src="js/settings.js"></script>
 <script>
    let settings_url = "[[=XML(settings_url)]]";
+   let load_user_settings_url = "[[=XML(load_user_settings_url)]]";
 </script>
+<script src="js/settings.js"></script>
 [[end]]
