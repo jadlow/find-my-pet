@@ -90,7 +90,7 @@
                             </div>
                         </div>
                         <!--Maximize Post-->
-                        <div class="is-size-2 has-text-centered" v-if="row.show_details == false" @click="show_details(row._idx, true)">
+                        <div class="is-size-2 has-text-centered" v-if="row.show_details == false" @click="show_details(row.pet.id, true)">
                             <i class="fa fa-angle-down has-text-info"></i>
                         </div>
                         <!--Display Comments Section-->
@@ -156,7 +156,7 @@
                             </div>
                         </div>
                         <!--Minimize Post-->
-                        <div class="is-size-2 has-text-centered" v-if="row.show_details == true" @click="show_details(row._idx, false)">
+                        <div class="is-size-2 has-text-centered" v-if="row.show_details == true" @click="show_details(row.pet.id, false)">
                             <i class="fa fa-angle-up has-text-info"></i>
                         </div>
 

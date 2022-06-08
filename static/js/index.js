@@ -79,8 +79,8 @@ let init = (app) => {
     };
 
     app.show_details = function (pet_idx, details_status) {
-        let pet = app.vue.pets[pet_idx];
-        pet.show_details = details_status;
+        let petwant = app.vue.pets.filter(x => x.pet.id==pet_idx);
+        petwant[0].show_details = details_status;
     };
 
     app.start_edit = function (comment_idx) {
