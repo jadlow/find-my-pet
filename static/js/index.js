@@ -12,6 +12,13 @@ let init = (app) => {
         pets: [],
         comments: [],
         users: [],
+        query: "",
+        results: " ",
+        search_lorf: [],
+        slipslide: "10",
+        pet_type: "Select Pet Type",
+        coord_inv: false,
+        error_message: "",
     };
 
     app.enumerate = (a) => {
@@ -103,6 +110,89 @@ let init = (app) => {
         pet.add_comment_content = "";
     };
 
+
+    app.search = function () {
+        app.vue.results = " ";
+        if(app.vue.query!="")
+        {
+            nums = app.vue.query.split(",");
+            app.vue.coord_inv = false;
+
+            if(nums.length != 2){
+                app.vue.error_message = "coordinate length incorrect. Please specify a number for the latitude and longitude, separated by a comma.";
+                app.vue.coord_inv = true;
+                return -1;
+            }
+            nums[0] = Number(nums[0]);
+            nums[1] = Number(nums[1]);
+            if(isNaN(nums[0])){
+                app.vue.error_message = "latitude not a number. Please specify a number for the latitude.";
+                app.vue.coord_inv = true;
+                return -1;
+            }
+            if(isNaN(nums[1])){
+                app.vue.error_message = "longitude not a number. Please specify a number for the longitude.";
+                app.vue.coord_inv = true;
+                return -1;
+            }
+            if(nums[0] < -90 || nums[0] > 90){
+                app.vue.error_message = "latitude is not in range. Please specify a number for the latitude from -90 to 90.";
+                app.vue.coord_inv = true;
+                return -1;
+            }
+            if(nums[1] < -180 || nums[1] > 180){
+                app.vue.error_message = "longtitude is not in range. Please specify a number for the longitude from -180 to 180.";
+                app.vue.coord_inv = true;
+                return -1;
+            }
+        }
+        
+        if((!app.vue.coord_inv) && app.vue.query!=""){
+            app.vue.results = app.vue.query;
+        }
+    };
+
+    app.lost_found = function () {
+        let both_true = false; // gets around both boxes not selected
+        let long_lat_ignore = false; // empty coords
+        let lat_range=[];
+        let long_range=[];
+        if (app.vue.search_lorf.length == 0){
+            both_true = true;
+        }
+        if (app.vue.results==" "){
+            long_lat_ignore = true;
+        }else{
+            let nums = app.vue.query.split(",");
+            lat_range.push(Number(nums[0])-(Number(app.vue.slipslide) * 0.02));
+            lat_range.push(Number(nums[0])+(Number(app.vue.slipslide) * 0.02));
+            long_range.push(Number(nums[1])-(Number(app.vue.slipslide) * 0.02));
+            long_range.push(Number(nums[1])+(Number(app.vue.slipslide) * 0.02));
+        }
+        axios.get(load_posts_url)
+        .then(function (response) {
+            let pets = response.data.pets;
+            app.enumerate(pets);
+            app.complete(pets);
+            let real = []
+            for (p in pets){
+                //if gets specific and not selected data
+                if (long_lat_ignore || ((pets[p].pet.pet_lat >= lat_range[0] && pets[p].pet.pet_lat <= lat_range[1]) && (pets[p].pet.pet_lng >= long_range[0] && pets[p].pet.pet_lng <= long_range[1]))){
+                    if (app.vue.pet_type == pets[p].pet.pet_type || app.vue.pet_type.includes("Select Pet Type")){
+                        if ((app.vue.search_lorf.includes("lost") || both_true) && pets[p].pet.pet_lost==true){
+                            real.push(pets[p]);
+                        }
+                        if ((app.vue.search_lorf.includes("found") || both_true) && pets[p].pet.pet_lost==false){
+                            real.push(pets[p]);
+                        }
+                    }
+                }
+            }
+            app.vue.pets = real;
+        });
+    };
+
+    
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
@@ -111,6 +201,8 @@ let init = (app) => {
         show_details: app.show_details,
         start_edit: app.start_edit,
         stop_edit: app.stop_edit,
+        search: app.search,
+        lost_found: app.lost_found,
 
     };
 
