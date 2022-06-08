@@ -10,7 +10,7 @@
         <div class="tile is-parent is-3 is-vertical">
             <div class="box">
             <h1 class="title">Search</h1>
-            <label class="label">Set Location Coordinates</label>
+            <label class="label">Set Location Coordinates <span class="icon has-text-info" @click="show_get_coord_info = true"><i class="fa fa-info-circle"></i></span></label>
             <input id="locInp" placeholder="Ex: 33, 67" type="text" v-model="query" @blur="search" class="input is-info">
             <div class="has-text-danger" v-if="coord_inv">
                 Location coordinates are invalid. Error {{ error_message }}
@@ -45,6 +45,19 @@
                     </div>
                 </div>
                 <button class="button is-link" @click="lost_found">Search</button>
+                <div class="modal is-active" v-if="show_get_coord_info">
+                    <div class="modal-background" @click="show_get_coord_info = false"></div>
+                    <div class="modal-content is-size-5">
+                        <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
+                            <button class="button is-danger" @click="show_get_coord_info = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
+                        </div>
+                        <div class="box">
+                            To get the coordinates, please go to <a href="https://www.google.com/maps" target="_blank">Google Maps</a>.
+                            Navigate to the location where the pet was lost or found.
+                            Right-click directly on the location and select the coordinates which will be automatically copied.
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row columns is-multiline is-mobile">
