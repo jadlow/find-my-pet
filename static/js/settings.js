@@ -44,6 +44,7 @@ let init = (app) => {
     app.data = {
         // Complete as you see fit.
         post_success: false,
+        auth_user_id: "",
         phone_num: "",
         radius: "",
         coordinates: "",
@@ -169,20 +170,30 @@ let init = (app) => {
             return -1;
         }
 
+        if(!app.vue.new_img_post_check_other){
+            if(app.vue.file_name == null || app.vue.file_name == ""){
+                app.vue.err_photo_null = true;
+                app.vue.err_main = true;
+                return -1;
+            }
+        }
+
         // Everything alright, add entry.
-        axios.post(add_post_url,
-            {
-                // first_name: app.vue.first_name,
-                // last_name: app.vue.last_name,
-                // email: app.vue.email,
-                phone_num: app.vue.phone_num,
-                radius: app.vue.radius,
-                coordinates: app.vue.coordinates,
-                latitude: latitude,
-                longitude: longitude,
-                photo: app.vue.upload_id,
-            }    
-        );
+        if(!app.vue.new_img_post_check_other){
+            axios.post(user_settings_url,
+                {
+                    // first_name: app.vue.first_name,
+                    // last_name: app.vue.last_name,
+                    // email: app.vue.email,
+                    phone_num: app.vue.phone_num,
+                    radius: app.vue.radius,
+                    coordinates: app.vue.coordinates,
+                    latitude: latitude,
+                    longitude: longitude,
+                    photo: app.vue.upload_id,
+                }    
+            );
+        }
         app.vue.post_success = true;
     }
 
@@ -210,7 +221,7 @@ let init = (app) => {
         } else {
             return "";
         }
-    }
+    };
 
 
     app.set_result = function (r) {
@@ -222,10 +233,16 @@ let init = (app) => {
         app.vue.file_size = r.data.file_size;
         app.vue.download_url = r.data.download_url;
         app.vue.upload_id = r.data.upload_id;
-    }
+    };
 
     app.upload_file = function (event) {
         app.vue.err_photo_bad_type = false;
+        app.vue.new_img_post_check_other = true;
+        if(app.settings() == -1){
+            app.vue.new_img_post_check_other = false;
+            return -1;
+        }
+        app.vue.new_img_post_check_other = false;
         let input = event.target;
         let file = input.files[0];
         if (file) {
@@ -233,19 +250,20 @@ let init = (app) => {
             let file_type = file.type;
             if(!app.vue.photo_extensions.includes(file_type.toLowerCase().split("/")[1])){
                 app.vue.err_photo_bad_type = true;
+                app.vue.delete_confirmation = false;
+                app.vue.deleting =  false;
                 app.vue.file_name = null;
                 app.vue.file_type = null;
                 app.vue.file_date = null;
-                app.vue.file_path = null;
                 app.vue.file_size = null;
+                app.vue.file_info = null;
                 app.vue.download_url = null;
                 app.vue.uploading = false;
-                app.vue.deleting = false;
-                app.vue.delete_confirmation = false;
-                app.vue.upload_id = -1;
-                app.vue.preview_url = null;
+                app.vue.temp_file_path = false;
+                app.vue.upload_id_temp = -1;
                 return -1;
             }
+            app.delete_file();
             let file_name = file.name;
             let file_size = file.size;
             // Requests the upload URL.
@@ -256,6 +274,7 @@ let init = (app) => {
             }).then ((r) => {
                 let upload_url = r.data.signed_url;
                 let file_path = r.data.file_path;
+                app.vue.temp_file_path = r.data.file_path;
                 // Uploads the file, using the low-level interface.
                 let req = new XMLHttpRequest();
                 // We listen to the load event = the file is uploaded, and we call upload_complete.
@@ -268,7 +287,7 @@ let init = (app) => {
                 req.send(file);
             });
         }
-    }
+    };
 
     app.upload_complete = function (file_name, file_type, file_size, file_path) {
         // We need to let the server know that the upload was complete;
@@ -286,14 +305,33 @@ let init = (app) => {
             app.vue.file_date = r.data.file_date;
             app.vue.download_url = r.data.download_url;
             app.vue.upload_id = r.data.upload_id;
+            app.vue.upload_id_temp = app.vue.upload_id;
+            app.vue.temp_file_path = app.vue.file_path;
+            app.vue.new_img_post = true;
+            app.settings();
         });
-    }
+    };
 
-    app.delete_file = function () {
+    app.pseudo_delete_file = function () {
         if (!app.vue.delete_confirmation) {
             // Ask for confirmation before deleting it.
             app.vue.delete_confirmation = true;
         } else {
+            app.vue.delete_confirmation = false;
+            app.vue.deleting =  false;
+            app.vue.file_name = null;
+            app.vue.file_type = null;
+            app.vue.file_date = null;
+            app.vue.file_size = null;
+            app.vue.file_info = null;
+            app.vue.download_url = null;
+            app.vue.uploading = false;
+            app.vue.temp_file_path = false;
+            app.vue.upload_id_temp = -1;
+        }
+    }
+
+    app.delete_file = function(){
             // It's confirmed.
             app.vue.delete_confirmation = false;
             app.vue.deleting = true;
@@ -316,8 +354,7 @@ let init = (app) => {
 
                 }
             });
-        }
-    };
+        };
 
     app.deletion_complete = function (file_path) {
         // We need to notify the server that the file has been deleted on GCS.
@@ -331,9 +368,11 @@ let init = (app) => {
             app.vue.file_date = null;
             app.vue.file_path = null;
             app.vue.download_url = null;
+            app.vue.upload_id_temp = -1;
             app.vue.upload_id = -1;
+            app.vue.temp_file_path = null;
         })
-    }
+    };
 
     app.download_file = function () {
         if (app.vue.download_url) {
@@ -366,7 +405,7 @@ let init = (app) => {
 
     app.computed = {
         file_info: app.file_info,
-    }
+    };
 
     app.location_preview = function(){
         document.getElementById("display_location").style.border="3px solid #60cc60";
@@ -393,7 +432,7 @@ let init = (app) => {
         app.vue.war_geoloc = false;
         navigator.geolocation.getCurrentPosition(
             function(pos_obj){
-                app.vue.coordinates = pos_obj.coordinates.latitude + ", " + pos_obj.coordinates.longitude;
+                app.vue.coordinates = pos_obj.coords.latitude + ", " + pos_obj.coords.longitude;
                 app.vue.prg_geoloc = false;
                 app.location_preview();
             },
@@ -408,7 +447,7 @@ let init = (app) => {
     app.get_user_info = function(){
         axios.get(get_user_info_url)
             .then(function(res){
-                app.vue.email = res.data.user_email;
+                app.vue.auth_user_id = res.data.auth_user_id;
             });
     };
 
@@ -423,8 +462,7 @@ let init = (app) => {
         upload_file: app.upload_file, // Uploads a selected file
         delete_file: app.delete_file, // Delete the file.
         download_file: app.download_file, // Downloads it.
-        location_preview: app.location_preview,
-        current_location: app.current_location,
+        pseudo_delete_file: app.pseudo_delete_file
     };
 
     // This creates the Vue instance.
@@ -445,11 +483,12 @@ let init = (app) => {
                 // app.vue.first_name = res.data.first_name;
                 // app.vue.last_name = res.data.last_name;
                 // app.vue.email = res.data.email;
+                app.vue.auth_user_id = res.data.auth_user_id;
                 app.vue.phone_num = res.data.phone_num;
                 app.vue.radius = res.data.radius;
                 app.vue.coordinates = res.data.coordinates;
-                app.vue.latitude = res.data.latitude;
-                app.vue.longitude = res.data.longitude;
+                app.vue.latitude = app.vue.latitude
+                app.vue.longitude = app.vue.longitude;
                 app.vue.upload_id = parseInt(res.data.photo);
                 app.vue.upload_id_temp = app.vue.upload_id;
                 app.location_preview();

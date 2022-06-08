@@ -37,7 +37,7 @@ from py4web import action, request, abort, redirect, URL, Field
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
-from .models import get_user_email, get_time
+from .models import get_user_email, get_time, get_user_id
 from .settings import APP_FOLDER
 from .gcs_url import gcs_url
 from py4web.utils.form import Form, FormStyleBulma
@@ -59,7 +59,14 @@ gcs = NQGCS(json_key_path=GCS_KEY_PATH)
 def index():
     pets = db(db.pet).select()
     comments = db(db.comment).select()
+    user_id = get_user_id()
+    
+    id = db.user.update_or_insert(
+        auth_user_id=user_id,
+    )
+
     return dict(
+        id=id,
         comments=comments,
         pets=pets, url_signer=url_signer
     )
@@ -180,22 +187,22 @@ def serve_map():
 def map_load_pins():
     return dict()
 
-@action('settings/<auth_user_id:int>', method=["GET", "POST"])
+
+@action('settings', method=["GET", "POST"])
 @action.uses('../components/settings.html', db, session, auth.user, url_signer)
-def serve_settings(auth_user_id=None):
-    assert auth_user_id is not None
-    user = db.user[auth_user_id]
-    if user.email != get_user_email():
-        redirect(URL('index'))
+def serve_settings():
+    user_id = get_user_id()
+    user = db.user[user_id]
+
     if user is None:
         # Nothing found to be edited
         redirect(URL('index'))
     # User form: record initialized
 
     return dict(
-        user_settings_url=URL("user_settings", str(auth_user_id), signer=url_signer),
-        get_user_info_url=URL("get_user_info", str(auth_user_id), signer=url_signer),
-        get_file_info_url=URL("get_file_info", str(user.photo), signer=url_signer),
+        user_settings_url=URL("user_settings", signer=url_signer),
+        get_user_info_url=URL("get_user_info", signer=url_signer),
+        get_file_info_url=URL("get_file_info", signer=url_signer),
         url_signer=url_signer,
         file_info_url=URL('file_info', signer=url_signer),
         obtain_gcs_url=URL('obtain_gcs', signer=url_signer),
@@ -204,26 +211,26 @@ def serve_settings(auth_user_id=None):
     )
 
 
-@action('user_settings/<auth_user_id:int>', method="POST")
-@action.uses(db, session, auth.user, url_signer.verify())
-def settings(auth_user_id=None):
+@action('user_settings', method=["GET", "POST"])
+@action.uses(db, session, auth.user, url_signer)
+def settings():
+    user = db(db.user.auth_user_id == db.auth_user.id).select()
 
-    user = db.user[auth_user_id]
-    if user.email != get_user_email():
-        redirect(URL('main-page'))
-    if user is None:
-        # Nothing found to be edited
-        redirect(URL('main-page'))
-    # User form: record initialized
-
-    db(db.user.auth_user_id == auth_user.id).update_or_insert(
+    db.user.update_or_insert(
         photo = request.json.get("photo"),
+        # first_name = request.json.get("first_name"),
+        # last_name = request.json.get("last_name"),
+        # email = request.json.get("email"),
         phone_num = request.json.get("phone_num"),
         radius = request.json.get("radius"),
         coordinates = request.json.get("coordinates"),
         latitude = request.json.get("latitude"),
-        longitude = request.json.get("longitude"),
-        location = request.json.get("location")
+        longitude = request.json.get("longitude")
+    )
+
+    return dict(
+        user=user,
+        url_signer=url_signer
     )
 
 

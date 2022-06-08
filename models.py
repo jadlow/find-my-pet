@@ -6,9 +6,17 @@ import datetime
 from .common import db, Field, auth, T
 from pydal.validators import *
 
+def get_user_id():
+    return auth.current_user.get("id") if auth.current_user else None
 
 def get_user_email():
     return auth.current_user.get('email') if auth.current_user else None
+
+def get_user_FirstName():
+    return auth.current_user.get('first_name') if auth.current_user else None
+    
+def get_user_LastName():
+    return auth.current_user.get('last_name') if auth.current_user else None
 
 
 def get_time():
