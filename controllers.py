@@ -184,8 +184,7 @@ def map_load_pins():
 @action.uses('../components/settings.html', db, session, auth.user, url_signer)
 def serve_settings(auth_user_id=None):
     assert auth_user_id is not None
-
-    user = db.auth_user[auth_user_id]
+    user = db.user[auth_user_id]
     if user.email != get_user_email():
         redirect(URL('index'))
     if user is None:
@@ -193,12 +192,10 @@ def serve_settings(auth_user_id=None):
         redirect(URL('index'))
     # User form: record initialized
 
-    user_info = db.user[user]
-
     return dict(
         user_settings_url=URL("user_settings", str(auth_user_id), signer=url_signer),
         get_user_info_url=URL("get_user_info", str(auth_user_id), signer=url_signer),
-        get_file_info_url=URL("get_file_info", str(user_info.photo), signer=url_signer),
+        get_file_info_url=URL("get_file_info", str(user.photo), signer=url_signer),
         url_signer=url_signer,
         file_info_url=URL('file_info', signer=url_signer),
         obtain_gcs_url=URL('obtain_gcs', signer=url_signer),
@@ -211,7 +208,7 @@ def serve_settings(auth_user_id=None):
 @action.uses(db, session, auth.user, url_signer.verify())
 def settings(auth_user_id=None):
 
-    user = db.auth_user[auth_user_id]
+    user = db.user[auth_user_id]
     if user.email != get_user_email():
         redirect(URL('main-page'))
     if user is None:
@@ -219,18 +216,7 @@ def settings(auth_user_id=None):
         redirect(URL('main-page'))
     # User form: record initialized
 
-    user_info = db.user[user]
-
-    db(db.auth_user.id == auth_user_id).update(
-        first_name = request.json.get("first_name"),
-        last_name = request.json.get("last_name"),
-        email = request.json.get("email")
-    )
-
-    db(db.user.email == auth_user.email).update(
-        first_name = request.json.get("first_name"),
-        last_name = request.json.get("last_name"),
-        email = request.json.get("email"),
+    db(db.user.auth_user_id == auth_user.id).update_or_insert(
         photo = request.json.get("photo"),
         phone_num = request.json.get("phone_num"),
         radius = request.json.get("radius"),

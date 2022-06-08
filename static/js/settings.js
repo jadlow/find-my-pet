@@ -44,21 +44,10 @@ let init = (app) => {
     app.data = {
         // Complete as you see fit.
         post_success: false,
-        first_name: "",
-        last_name: "",
-        email: "",
         phone_num: "",
         radius: "",
         coordinates: "",
-        latitude: "",
-        longitude: "",
         err_main: false,
-        err_first_name: false,
-        err_first_name_i: "",
-        err_last_name: false,
-        err_last_name_i: "",
-        err_email: false,
-        err_email_i: "",
         err_phone_num: false,
         err_phone_num_i: "",
         err_radius: false,
@@ -68,6 +57,8 @@ let init = (app) => {
         err_photo_null: false,
         err_photo_bad_type: false,
         photo_extensions: ["gif", "jpg", "jpeg", "png", "svg", "tif", "webp"],
+        err_coord: false,
+        err_coord_i: "",
         war_geoloc: false,
         prg_geoloc: false,
         location_preview_zoom: 12,
@@ -83,7 +74,11 @@ let init = (app) => {
         deleting: false, // delete in progress
         delete_confirmation: false, // Show the delete confirmation thing.
         upload_id: -1,
-        preview_url: null
+        upload_id_temp: -1,
+        temp_file_path: null,
+        preview_url: null,
+        new_img_post: false,
+        new_img_post_check_other: false
     };
 
     app.enumerate = (a) => {
@@ -96,9 +91,6 @@ let init = (app) => {
 
     app.settings = function(){
         app.vue.err_main = false;
-        app.vue.err_first_name = false;
-        app.vue.err_last_name = false;
-        app.vue.err_email = false;
         app.vue.err_phone_num = false;
         app.vue.err_radius = false;
         app.vue.err_coordinates = false;
@@ -107,35 +99,31 @@ let init = (app) => {
         app.vue.err_coord = false;
         app.vue.war_geoloc = false;
         
-        // Check name.
-        if(app.vue.first_name.replace(/\s/g, "").length == 0) {
-            app.vue.err_first_name_i = "Empty first name. Please specify a first name that contains 1 or more characters."
-            app.vue.err_first_name = true;
-            app.vue.err_main = true;
-            return -1;
-        }
-
-        if(app.vue.last_name.replace(/\s/g, "").length == 0) {
-            app.vue.err_last_name_i = "Empty last name. Please specify a last name that contains 1 or more characters."
-            app.vue.err_last_name = true;
-            app.vue.err_main = true;
-            return -1;
-        }
-
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(app.vue.email)) {
-            app.vue.err_email_i = "Invalid email."
-        }
-
-        let new_pet_lost_bool = true;
-        if(app.vue.new_pet_lost == "false"){
-            new_pet_lost_bool = false;
-        }
-
         // Check photo
-        if(app.vue.file_name == null || app.vue.file_name == ""){
-            app.vue.err_photo_null = true;
-            app.vue.err_main = true;
-            return -1;
+        // if(app.vue.file_name == null || app.vue.file_name == ""){
+        //     app.vue.err_photo_null = true;
+        //     app.vue.err_main = true;
+        //     return -1;
+        // }
+
+        if (app.vue.phone_num.length < 10 || app.vue.phone_num.length > 10) {
+            app.vue.err_phone_num_i = "phone numbers must be 10 numbers long.";
+            app.err_phone_num = true;
+            app.err_main = true;
+        }
+
+        if (app.vue.radius.length < 0) {
+            app.vue.err_radius_i = "radius must be 0 or bigger.";
+            app.err_radius = true;
+            app.err_radius = true;
+        }
+
+        if(!app.vue.new_img_post_check_other){
+            if(app.vue.file_name == null || app.vue.file_name == ""){
+                app.vue.err_photo_null = true;
+                app.vue.err_main = true;
+                return -1;
+            }
         }
 
         // Check coordinates.
@@ -184,9 +172,9 @@ let init = (app) => {
         // Everything alright, add entry.
         axios.post(add_post_url,
             {
-                first_name: app.vue.first_name,
-                last_name: app.vue.last_name,
-                email: app.vue.email,
+                // first_name: app.vue.first_name,
+                // last_name: app.vue.last_name,
+                // email: app.vue.email,
                 phone_num: app.vue.phone_num,
                 radius: app.vue.radius,
                 coordinates: app.vue.coordinates,
@@ -420,7 +408,7 @@ let init = (app) => {
     app.get_user_info = function(){
         axios.get(get_user_info_url)
             .then(function(res){
-                app.vue.first_name = res.data.first_name;
+                app.vue.email = res.data.user_email;
             });
     };
 
@@ -454,14 +442,14 @@ let init = (app) => {
         // Typically this is a server GET call to load the data.
         axios.get(get_user_info_url)
             .then(function(res){
-                app.vue.first_name = res.data.first_name;
-                app.vue.last_name = res.data.last_name;
-                app.vue.email = res.data.email;
+                // app.vue.first_name = res.data.first_name;
+                // app.vue.last_name = res.data.last_name;
+                // app.vue.email = res.data.email;
                 app.vue.phone_num = res.data.phone_num;
                 app.vue.radius = res.data.radius;
                 app.vue.coordinates = res.data.coordinates;
-                // app.vue.latitude = res.data.latitude;
-                // app.vue.longitude = res.data.longitude;
+                app.vue.latitude = res.data.latitude;
+                app.vue.longitude = res.data.longitude;
                 app.vue.upload_id = parseInt(res.data.photo);
                 app.vue.upload_id_temp = app.vue.upload_id;
                 app.location_preview();
