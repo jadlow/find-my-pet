@@ -10,36 +10,41 @@
         <div class="tile is-parent is-3 is-vertical">
             <div class="box">
             <h1 class="title">Search</h1>
-            <label class="label">Set Coordinate Location</label>
-            <input id="locInp" type="text" class="input is-info">
+            <label class="label">Set Location Coordinates</label>
+            <input id="locInp" placeholder="Ex: 33, 67" type="text" v-model="query" @blur="search" class="input is-info">
+            <div class="has-text-danger" v-if="coord_inv">
+                Location coordinates are invalid. Error {{ error_message }}
+            </div>
             <label class="label">Radius</label>
-            <input id="distRangeSlider" class="slider is-fullwidth" min="0.5" max="20.0" value="10.0" step="0.5" type="range" onchange="changeDistRangeDisplay(this.value);">
-            <br><span id="distRangeDisplay">10</span> mi
-            <label class="label">Lost/Found</label>
-                <label class="checkbox">
-                    <input type="checkbox">
-                    Lost
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox">
-                    Found
-                </label>
-            <label class="label">Type Pet</label>
-            <div class="field">
-                <div class="control">
-                  <div class="select">
-                    <select>
-                      <option>Select Pet Type</option>
-                      <option>Dog</option>
-                      <option>Cat</option>
-                      <option>Bird</option>
-                      <option>Bunny</option>
-                      <option>Other</option>
-                    </select>
-                  </div>
+                <input id="distRangeSlider" v-model="slipslide" class="slider is-fullwidth" min="0.0" max="50.0" value="10.0" step="10.0" type="range">
+                <div> {{ slipslide }} mi </div>
+                <div class="field">
+                    <label class="label">Lost or Found</label>
+                    <input type="checkbox" id="l" v-model="search_lorf" value="lost" >
+                    <label for="l">Lost</label>
+                    <input type="checkbox" id="f" v-model="search_lorf" value="found" >
+                    <label for="f">Found</label>
                 </div>
-              </div>
-              <button class="button is-link">Search</button>
+                <label class="label">Type Pet</label>
+                <div class="field">
+                    <div class="control">
+                        <div class="select">
+                            <select v-model="pet_type">
+                            <option selected>Select Pet Type</option>
+                            <option>Dog</option>
+                            <option>Cat</option>
+                            <option>Bird</option>
+                            <option>Rodent</option>
+                            <option>Reptile</option>
+                            <option>Rabbit</option>
+                            <option>Pet Livestock</option>
+                            <option>Aquatic</option>
+                            <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button class="button is-link" @click="lost_found">Search</button>
             </div>
         </div>
         <div class="row columns is-multiline is-mobile">
