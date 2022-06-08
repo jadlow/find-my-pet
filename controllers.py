@@ -68,9 +68,6 @@ def index():
 @action('main-page')
 @action.uses('../components/main.html', db, auth, url_signer)
 def serve_main():
-    pets = db(db.pet.user_email == db.auth_user.email).select()
-    comments = db(db.comment).select()
-    users = db(db.user).select()
     return dict(
         load_posts_url=URL('load_posts', signer=url_signer),
         load_comments_url=URL('load_comments', signer=url_signer),
@@ -79,8 +76,6 @@ def serve_main():
         delete_comment_url=URL('delete_comment', signer=url_signer),
         edit_comment_url=URL('edit_comment', signer=url_signer),
         current_user_email=get_user_email(),
-        pets=pets,
-        comments=comments,
         url_signer=url_signer
     )
 
@@ -93,7 +88,9 @@ def load_posts():
     for row in rows:
         u_row = db(db.upload.id == row.pet.photo).select().as_list()
         file_path = u_row[0]['file_path']
-
+        row['edit_url'] = URL('edit', row.pet['id'], signer=url_signer)
+        row['delete_url'] = URL('delete', row.pet['id'], signer=url_signer)
+        row['map_url'] = "https://google.com/maps/place/" + str(row.pet.pet_lat) + "," + str(row.pet.pet_lng) + "/"
         row.pet["signed_url"] = None if file_path is None else gcs_url(GCS_KEYS, file_path, verb='GET')
     li = rows.as_list()
     return dict(pets=li)
@@ -459,7 +456,7 @@ def get_pet_info(pet_id = None):
         cur_pet_description = p.description,
         cur_pet_lat = p.pet_lat,
         cur_pet_lng = p.pet_lng,
-        cur_pet_photo = p.photo
+        cur_pet_photo = p.photo,
     )
 
 @action("edit_post/<pet_id:int>", method="POST")
@@ -488,7 +485,7 @@ def delete(pet_id=None):
     assert pet_id is not None
     p = db.pet[pet_id]
     if p.user_email != get_user_email():
-        redirect(URL('index'))
+        redirect(URL('main-page'))
     u_row = db(db.upload.id == p.photo).select().as_list()
     file_path = u_row[0]['file_path']
     print(file_path)
@@ -500,61 +497,4 @@ def delete(pet_id=None):
             signed_url = gcs_url(GCS_KEYS, file_path, verb='DELETE')
     db(db.upload.id == p.photo).delete()
     db(db.pet.id == pet_id).delete()
-    redirect(URL('index'))
-
-
-# COMMENTS
-
-
-@action('add_comment/<pet_id:int>', method=["GET", "POST"])
-@action.uses('../components/add_comment.html', db, session, auth.user)
-def add_comment(pet_id=None):
-    assert pet_id is not None
-    form = Form([Field('post_text', 'text')], csrf_session=session,
-                formstyle=FormStyleBulma)
-    if form.accepted:
-        pet = db(db.pet.id == pet_id).select().first()
-        db.comment.insert(
-            user_email=get_user_email(),
-            pet_id=pet_id,
-            post_date=get_time(),
-            post_text=form.vars["post_text"],
-        )
-        redirect(URL('main-page'))
-    # # Insert form: no record init
-    # form = Form(db.comment, csrf_session=session, formstyle=FormStyleBulma)
-    # if form.accepted:
-    #     # We simply redirect; the insertion already happened
-    #     redirect(URL('index'))
-    # # Either this is a GET request, or this is a POST but not accepted with errors.
-    return dict(form=form)
-
-
-@action('edit_comment/<comment_id:int>', method=["GET", "POST"])
-@action.uses('../components/edit_comment.html', db, session, auth.user, url_signer.verify())
-def edit_comment(comment_id=None):
-    assert comment_id is not None
-    # We read the product being edited from the db.
-    p = db.comment[comment_id]
-    if p.user_email != get_user_email():
-        redirect(URL('index'))
-    if p is None:
-        # Nothing found to be edited
-        redirect(URL('index'))
-    # Edit form: record initialized
-    form = Form(db.comment, record=p, deletable=False, csrf_session=session, formstyle=FormStyleBulma)
-    if form.accepted:
-        # The update already happened
-        redirect(URL('main-page'))
-    return dict(form=form)
-
-
-@action('delete_comment/<comment_id:int>')
-@action.uses(db, session, auth.user, url_signer.verify())
-def delete(comment_id=None):
-    assert comment_id is not None
-    p = db.comment[comment_id]
-    if p.user_email != get_user_email():
-        redirect(URL('index'))
-    db(db.comment.id == comment_id).delete()
     redirect(URL('main-page'))

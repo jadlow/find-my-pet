@@ -50,14 +50,21 @@
                         <div class="block is-mobile">
 
                             <!--Maximize and minimize functionality-->
-                            <div v-if="row.show_details == false" @click="show_details(row._idx, true)">
+                            <div class="columns">
+                                <div class="column" v-if="row.show_details == false" @click="show_details(row._idx, true)">
                                 <i class="fa fa-window-maximize has-text-info has-text-right"></i>
-                            </div>
-                            <div v-if="row.show_details == true" @click="show_details(row._idx, false)">
-                                <i class="fa fa-window-minimize has-text-info has-text-right"></i>
-                            </div>
-                            <div v-if="row.pet.user_email == '[[=current_user_email]]'">
-
+                                </div>
+                                <div class="column" v-if="row.show_details == true" @click="show_details(row._idx, false)">
+                                    <i class="fa fa-window-minimize has-text-info has-text-right"></i>
+                                </div>
+                                <div class="column has-text-right" v-if="row.pet.user_email == '[[=current_user_email]]'">
+                                    <a :href="row.edit_url">
+                                        <i class="fa fa-fw fa-pencil"></i>
+                                    </a>
+                                    <a class="has-text-danger" :href="row.delete_url">
+                                        <i class="fa fa-fw fa-trash"></i>
+                                    </a>
+                                </div>
                             </div>
 
                             <div class="card-image">
@@ -71,7 +78,10 @@
                                 <span class="icon">
                                     <i class="fa fa-fw fa-map-marker"></i>
                                 </span>
-                                {{ row.pet.pet_latlng_square }}
+                                <a :href="row.map_url">
+                                    {{ row.pet.pet_lat }},
+                                    {{ row.pet.pet_lng }}
+                                </a>
                             </div>
                             <div v-if="row.show_details == true" class="content is-size-5">
                                 {{ row.pet.description }}
