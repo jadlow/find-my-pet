@@ -103,7 +103,8 @@
                                 <div class="is-size-6" v-for="user in users">
                                     <div v-if="user.email == row.pet.user_email">
                                         <span class="is-size-5">{{ row.contact_name }}</span> <br>
-                                        <i class="fa fa-envelope has-text-info-dark"></i> {{ row.pet.user_email }}
+                                        <i class="fa fa-envelope has-text-info-dark"></i> {{ row.pet.user_email }} <br>
+                                        <i class="fa fa-phone has-text-info-dark"></i> {{ row.phone_num }}
                                     </div>
                                 </div>
                             </div>
@@ -147,12 +148,12 @@
                         </div>
 
                         <!--Display Comment Input-->
-                        <div v-if="row.show_details == true" class="columns">
+                        <div v-if="row.show_details == true" class="columns box">
                             <div class="control column is-three-quarters">
                               <input type="text" v-model="row.add_comment_content" class="input" placeholder="add comment...">
                             </div>
                             <div class="control column has-text-centered is-one-quarter">
-                              <input type="submit" @click="add_comment(row.pet.id)" value="Comment" class="button is-primary">
+                              <input type="submit" @click="add_comment(row.pet.id)" value="+" class="button is-primary">
                             </div>
                         </div>
                         <!--Minimize Post-->

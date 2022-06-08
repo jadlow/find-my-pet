@@ -109,6 +109,7 @@ def load_posts():
         for user in users:
             if user.auth_user_id.email == row.pet.user_email:
                 row['contact_name'] = user.username
+                row['phone_num'] = user.phone_num
     li = rows.as_list()
     return dict(pets=li)
 
