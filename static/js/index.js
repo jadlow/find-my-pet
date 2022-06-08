@@ -11,6 +11,7 @@ let init = (app) => {
         // Complete as you see fit.
         pets: [],
         comments: [],
+        users: [],
     };
 
     app.enumerate = (a) => {
@@ -110,6 +111,7 @@ let init = (app) => {
         show_details: app.show_details,
         start_edit: app.start_edit,
         stop_edit: app.stop_edit,
+
     };
 
     // This creates the Vue instance.
@@ -135,6 +137,12 @@ let init = (app) => {
                 let comments = response.data.comments;
                 app.decorate(app.enumerate(comments));
                 app.vue.comments= comments;
+            });
+        axios.get(load_users_url)
+            .then(function (response) {
+                let users = response.data.users;
+                app.enumerate(users);
+                app.vue.users=users;
             });
     };
 

@@ -34,7 +34,7 @@ db.define_table('pet',
                 Field('pet_lostfound_date', 'date', requires=IS_NOT_EMPTY()),
                 Field('is_reunited', 'boolean', default=False),
                 Field('description', 'text', requires=IS_NOT_EMPTY(), label=T('Description')),
-                Field('photo', 'text'),  # This contains the image URL, see Unit 18
+                Field('photo', 'reference upload'),  # This contains the image URL, see Unit 18
                 Field('pet_latlng_square', 'string'),  # This is the ~1KM square.
                 Field('pet_lat', 'double', requires=IS_NOT_EMPTY()),
                 Field('pet_lng', 'double', requires=IS_NOT_EMPTY()),

@@ -4,3 +4,4 @@ databases/*
 !databases/README.md
 *private
 *.vscode
+*.DS_Store
