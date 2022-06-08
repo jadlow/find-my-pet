@@ -32,8 +32,8 @@
          <div class="control">
             <input type="text" class="input is-info" v-model="radius">
          </div>
-         <div class="has-text-danger" v-if="err_phone_num">
-            Error {{err_phone_num_i}}
+         <div class="has-text-danger" v-if="err_radius">
+            Error {{err_radius_i}}
          </div>
       </div>
       <div class="field">
@@ -80,17 +80,18 @@
       </div>
    </div>
    <div class="modal is-active" v-if="err_main">
-      <div class="modal-background"></div>
+      <div class="modal-background" @click="err_main = false"></div>
       <div class="modal-content is-size-5">
-         <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
-            <button class="button is-danger" @click="err_main = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
-         </div>
-         <div class="box">
-            There has been an error with your submission information.
-            Please check the form's fields.
-         </div>
+          <div class="box has-text-right" style="background: transparent; padding: 0; margin-bottom: 3px;">
+              <button class="button is-danger" @click="err_main = false" style="border-radius: 60%; height: 40px; width: 40px;"><i class="fa fa-times"></i></button>
+          </div>
+          <div class="box">
+              There has been an error with your submission information.
+              Please check the form's fields.
+              Note: Error checking is usually performed when the Report Pet button is clicked, not checked when the input fields' values are being changed, so the error messages may get outdated.
+          </div>
       </div>
-   </div>
+  </div>
 </div>
 
 [[block page_scripts]]
