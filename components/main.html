@@ -56,6 +56,9 @@
                             <div v-if="row.show_details == true" @click="show_details(row._idx, false)">
                                 <i class="fa fa-window-minimize has-text-info has-text-right"></i>
                             </div>
+                            <div v-if="row.pet.user_email == '[[=current_user_email]]'">
+
+                            </div>
 
                             <div class="card-image">
                                 <figure class="image">
@@ -73,14 +76,19 @@
                             <div v-if="row.show_details == true" class="content is-size-5">
                                 {{ row.pet.description }}
                             </div>
-                            <div class="subtitle">
-                                <span class="is-size-6">Contact Information</span>
-
-                            </div>
                         </div>
 
                         <!--Display Comments Section-->
-                        <div class="block" v-if="row.show_details == true" v-for="comment in comments">
+                        <div class="block" v-if="row.show_details == true">
+                            <div class="subtitle">
+                                <span class="is-size-6">Contact Information</span>
+                                <div v-for="user in users">
+                                    <div v-if="user.email == row.pet.user_email">
+                                        {{ row.pet.user_email }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-for="comment in comments">
                             <div v-if="comment.pet_id == row.pet.id">
                                 <div class="box">
                                     <div class="columns container">
@@ -115,6 +123,7 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
                             </div>
                         </div>
 
