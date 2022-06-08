@@ -25,6 +25,7 @@ let init = (app) => {
     };
 
     app.load_pins = function(){
+        console.log("hi");
         app.vue.coord_inv = false;
         new_coord_cleaned = app.vue.new_coord.replace(/\s/g, "");
         const new_coord_split = new_coord_cleaned.split(",");
@@ -61,6 +62,11 @@ let init = (app) => {
             app.vue.coord_inv = true;
             return -1;
         }
+
+        axios.get(load_pins_url, {params: {status: app.vue.search_lorf, radius: app.vue.new_radius, new_lat: new_lat, new_lon: new_lon}})
+            .then(function (response) {
+                console.log(app.vue.new_radius);
+            });
     }
 
     // This contains all the methods.
