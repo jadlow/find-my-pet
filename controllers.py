@@ -68,6 +68,15 @@ def index():
 @action('main-page')
 @action.uses('../components/main.html', db, auth, url_signer)
 def serve_main():
+    # makes sure user is logged in before accessing website
+    if get_user_email() is None:
+        redirect(URL('auth', 'login'))
+    user = db(db.user.email == get_user_email()).select()
+    if user:
+        print("exists")
+    else:
+        print("DNE")
+    print(user)
     return dict(
         load_posts_url=URL('load_posts', signer=url_signer),
         load_comments_url=URL('load_comments', signer=url_signer),
@@ -85,13 +94,18 @@ def serve_main():
 @action.uses(url_signer.verify(), db)
 def load_posts():
     rows = db(db.pet.user_email == db.auth_user.email).select(orderby=~db.pet.creation_date)
+    users = db(db.auth_user).select()
     for row in rows:
         u_row = db(db.upload.id == row.pet.photo).select().as_list()
         file_path = u_row[0]['file_path']
         row['edit_url'] = URL('edit', row.pet['id'], signer=url_signer)
         row['delete_url'] = URL('delete', row.pet['id'], signer=url_signer)
         row['map_url'] = "https://google.com/maps/place/" + str(row.pet.pet_lat) + "," + str(row.pet.pet_lng) + "/"
+        row['map_display_url'] = "https://google.com/maps?q=" + str(row.pet.pet_lat) + "," + str(row.pet.pet_lng) + "&z=12&output=embed"
         row.pet["signed_url"] = None if file_path is None else gcs_url(GCS_KEYS, file_path, verb='GET')
+        for user in users:
+            if user.email == row.pet.user_email:
+                row['contact_name'] = user.first_name + " " + user.last_name
     li = rows.as_list()
     return dict(pets=li)
 
