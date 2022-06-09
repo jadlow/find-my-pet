@@ -20,6 +20,8 @@ let init = (app) => {
         coord_inv: false,
         error_message: "",
         show_get_coord_info: false,
+        current_user: "",
+        displays:"",
     };
 
     app.enumerate = (a) => {
@@ -193,7 +195,7 @@ let init = (app) => {
         });
     };
 
-    
+
     // This contains all the methods.
     app.methods = {
         // Complete as you see fit.
@@ -204,7 +206,6 @@ let init = (app) => {
         stop_edit: app.stop_edit,
         search: app.search,
         lost_found: app.lost_found,
-
     };
 
     // This creates the Vue instance.
@@ -224,6 +225,9 @@ let init = (app) => {
                 app.enumerate(pets);
                 app.complete(pets);
                 app.vue.pets = pets;
+                user = response.data.users.filter(x => x.auth_user_id==response.data.user_coords)[0];
+                concat_string = ""+user.latitude+", "+user.longitude;
+                app.vue.query = concat_string;
             });
         axios.get(load_comments_url)
             .then(function (response) {

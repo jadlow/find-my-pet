@@ -99,6 +99,7 @@ def serve_main():
 def load_posts():
     rows = db(db.pet.user_email == db.auth_user.email).select(orderby=~db.pet.creation_date)
     users = db(db.user).select()
+    auth_user_coords = db(db.auth_user.email==get_user_email()).select().first()
     for row in rows:
         u_row = db(db.upload.id == row.pet.photo).select().as_list()
         file_path = u_row[0]['file_path']
@@ -112,7 +113,7 @@ def load_posts():
                 row['contact_name'] = user.username
                 row['phone_num'] = user.phone_num
     li = rows.as_list()
-    return dict(pets=li)
+    return dict(pets=li, users=users, user_coords=auth_user_coords.id)
 
 
 @action('load_comments')
