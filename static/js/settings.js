@@ -102,8 +102,39 @@ let init = (app) => {
             return -1;
         }
 
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(app.vue.email)) {
-            app.vue.err_email_i = "Invalid email."
+        if (app.vue.phone_num.length != 10) {
+            app.vue.err_phone_num_i = "phone numbers must be 10 numbers long.";
+            app.vue.err_phone_num = true;
+            app.vue.err_main = true;
+            return -1;
+        }
+
+        if(isNaN(app.vue.phone_num)) {
+            app.vue.err_phone_num_i = "Invalid phone number.";
+            app.vue.err_phone_num = true;
+            app.vue.err_main = true;
+            return -1;
+        }
+
+        if (app.vue.radius < 0) {
+            app.vue.err_radius_i = "radius must be a positive number.";
+            app.vue.err_radius = true;
+            app.vue.err_main = true;
+            return -1;
+        }
+
+        if (isNaN(app.vue.radius)) {
+            app.vue.err_radius_i = "radius must be a number.";
+            app.vue.err_radius = true;
+            app.vue.err_radius = true;
+            return -1;
+        }
+
+        if (app.vue.radius < 0) {
+            app.vue.err_radius_i = "radius must be 0 or bigger.";
+            app.err_radius = true;
+            app.err_radius = true;
+            return -1;
         }
 
         // Check coordinates.
@@ -153,14 +184,11 @@ let init = (app) => {
         axios.post(settings_url,
             {
                 first_name: app.vue.first_name,
-                last_name: app.vue.last_name,
-                email: app.vue.email,
                 phone_num: app.vue.phone_num,
                 radius: app.vue.radius,
                 coordinates: app.vue.coordinates,
                 latitude: latitude,
                 longitude: longitude,
-                photo: app.vue.upload_id,
             }    
         );
         app.vue.post_success = true;

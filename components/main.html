@@ -76,7 +76,8 @@
 
                             <!--Post Header-->
                             <div class="columns">
-                                <div class="column is-four-fifths has-text-centered mg-small" style="word-break:break-word;font-size: 25px;font-weight: 600;">{{ row.pet.pet_name }}</div>
+                                <div class="column is-one-fifth"></div>
+                                <div class="column is-three-fifths has-text-centered" style="word-break:break-word;font-size: 25px;font-weight: 600;">{{ row.pet.pet_name }}</div>
                                 <div class="column has-text-right" v-if="row.pet.user_email == '[[=current_user_email]]'">
                                     <a :href="row.edit_url">
                                         <i class="fa fa-fw fa-pencil"></i>
@@ -102,7 +103,7 @@
                             <iframe width="100%" :src="row.map_display_url" style=" border-radius: 4px; height: 200px; width: 100%;"></iframe>
                             <div class="columns is-size-5">
                                 <div class="column">
-                                    <a :href="row.map_url">
+                                    <a  class="is-size-6" :href="row.map_url">
                                         <i class="fa fa-fw fa-map-marker"></i>
                                         {{ row.pet.pet_lat }},
                                         {{ row.pet.pet_lng }}
