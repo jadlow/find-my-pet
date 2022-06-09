@@ -259,7 +259,7 @@ def map_load_pins():
     petCoords = []     
     for p in pets:
         if( (p['pet_lat'] <= nor_lat) and (p['pet_lat'] >= sou_lat) and (p['pet_lng'] <= east_lon) and (p['pet_lng'] >= west_lon)):
-            petCoords.append(str(p['pet_lat']) + ", " + str(p['pet_lng']))
+            petCoords.append([p['pet_lat'], p['pet_lng']])
 
     print(petCoords)
     return dict(

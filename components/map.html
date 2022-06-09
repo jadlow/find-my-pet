@@ -3,14 +3,38 @@
 <div class="section" id="vue-target-map">
    <h1 class="title is-1">Map of Lost and Found Pets</h1>
    <div class="columns">
-      
+    <div class="column is-one-third">
+        <!-- Map parameters go in here -->
+           <div class="field">
+              <label class="label">Location coordinates</label>
+              <div class="control">
+                 <input class="input is-info" type="text" v-model="new_coord" placeholder="Coordinates">
+              </div>
+           </div>
+           <div class="has-text-danger" v-if="coord_inv">
+              Location coordinates are invalid. Error {{error_message}}
+           </div>
+           <div class="field">
+              <label class="label">Range</label>
+              <div class="control">
+                 <input type="range" v-model="new_radius" style="width: 100%;" min="0.5" max="50.0" step="0.5">
+              </div>
+              {{new_radius}} mile<span v-if="new_radius != 1">s</span>
+           </div>
+           <div class="field">
+              <label class="label">Lost or Found</label>
+              <input type="radio" name="lorf" v-model="search_lorf" value="lost" checked> Lost
+              <input type="radio" name="lorf" v-model="search_lorf" value="found"> Found
+           </div>
+           <button class="button is-link" @click="load_pins();">Load locations</button>
+        </div>      
       <div class="column">
 
          <div id="map" style="height: 400px; width: 100%;">
             
          </div>
 
-         <script>
+         <!--<script>
 
             function initMap(){
                var options = {
@@ -81,19 +105,20 @@
                    map: map,
                });
             }
-         </script>
+         </script>-->
 
-         <script async
-             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_WqBF-BSYZ8s1R5zgFOWpPa35eQYq-TM&callback=initMap"
-             defer>
-         </script>
+         
 
       </div>
    </div>
 </div>
 [[block page_scripts]]
-<script src="js/map.js"></script>
+<script async
+             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_WqBF-BSYZ8s1R5zgFOWpPa35eQYq-TM"
+             defer>
+         </script>
 <script>
    let load_pins_url = "[[=XML(load_pins_url)]]";
 </script>
+<script src="js/map.js"></script>
 [[end]]

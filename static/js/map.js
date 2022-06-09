@@ -65,7 +65,23 @@ let init = (app) => {
 
         axios.get(load_pins_url, {params: {status: app.vue.search_lorf, radius: app.vue.new_radius, new_lat: new_lat, new_lon: new_lon}})
             .then(function (response) {
-                console.log(app.vue.new_radius);
+                const new_coord_cleaned = app.vue.new_coord.replace(/\s/g, "");
+                const new_coord_split = new_coord_cleaned.split(",");
+                const options = {
+                    zoom:8,
+                    center: {lat: parseFloat(new_coord_split[0]), lng: parseFloat(new_coord_split[1])}
+                 }
+  
+                 
+                 let map = new google.maps.Map(document.getElementById("map"), options);
+                 console.log(response.data.petArr);
+                 for(let loc in response.data.petArr){
+                     loc = response.data.petArr[loc];
+                     let newMarker = new google.maps.Marker({
+                        position: {lat: loc[0], lng: loc[1]},
+                        map: map
+                     });
+                 }
             });
     }
 
@@ -86,7 +102,6 @@ let init = (app) => {
     app.init = () => {
         // Put here any initialization code.
         // Typically this is a server GET call to load the data.
-
     };
 
     // Call to the initializer.
