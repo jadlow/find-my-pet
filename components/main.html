@@ -78,8 +78,15 @@
                         <div class="block is-mobile">
 
                             <!--Post Header-->
-                            <div class="columns">
-                                <div class="column is-one-fifth"></div>
+                            <div class="columns is-size-4">
+                                <div class="column is-one-fifth">
+                                    <span class="has-text-right icon has-text-warning" v-if="row.pet.pet_lost == true">
+                                        <i class="fa fa-map-pin"></i>
+                                    </span>
+                                    <span class="has-text-right icon has-text-success " v-else >
+                                        <i class="fa fa-map-pin"></i>
+                                    </span>
+                                </div>
                                 <div class="column is-three-fifths has-text-centered" style="word-break:break-word;font-size: 25px;font-weight: 600;">{{ row.pet.pet_name }}</div>
                                 <div class="column has-text-right" v-if="row.pet.user_email == '[[=current_user_email]]'">
                                     <a :href="row.edit_url">
@@ -88,12 +95,6 @@
                                     <a class="has-text-danger" :href="row.delete_url">
                                         <i class="fa fa-fw fa-trash"></i>
                                     </a>
-                                    <span class="icon has-text-warning" v-if="row.pet.pet_lost == true">
-                                        <i class="fa fa-map-pin"></i>
-                                    </span>
-                                    <span class="icon has-text-success " v-else >
-                                        <i class="fa fa-map-pin"></i>
-                                    </span>
                                 </div>
                             </div>
 
