@@ -10,7 +10,7 @@
         <div class="tile is-parent is-3 is-vertical">
             <div class="box">
             <h1 class="title">Search</h1>
-            <label class="label">Set Location Coordinates <span class="icon has-text-info" @click="show_get_coord_info = true"><i class="fa fa-info-circle"></i></span></label>
+            
             <input id="locInp" placeholder="Ex: 33, 67" type="text" v-model="query" @blur="search" class="input is-info">
             <div class="has-text-danger" v-if="coord_inv">
                 Location coordinates are invalid. Error {{ error_message }}
@@ -21,9 +21,17 @@
                 <div class="field">
                     <label class="label">Lost or Found</label>
                     <input type="checkbox" id="l" v-model="search_lorf" value="lost" >
-                    <label for="l">Lost</label>
+                    <label for="l">Lost
+                        <span class="icon has-text-warning">
+                            <i class="fa fa-map-pin"></i>
+                        </span>
+                    </label>
                     <input type="checkbox" id="f" v-model="search_lorf" value="found" >
-                    <label for="f">Found</label>
+                    <label for="f">Found
+                        <span class="icon has-text-success">
+                            <i class="fa fa-map-pin"></i>
+                        </span>
+                    </label>
                 </div>
                 <label class="label">Type Pet</label>
                 <div class="field">
@@ -76,6 +84,12 @@
                                     <a class="has-text-danger" :href="row.delete_url">
                                         <i class="fa fa-fw fa-trash"></i>
                                     </a>
+                                    <span class="icon has-text-warning" v-if="row.pet.pet_lost == true">
+                                        <i class="fa fa-map-pin"></i>
+                                    </span>
+                                    <span class="icon has-text-success " v-else >
+                                        <i class="fa fa-map-pin"></i>
+                                    </span>
                                 </div>
                             </div>
 
