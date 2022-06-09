@@ -3,33 +3,91 @@
 <div class="section" id="vue-target-map">
    <h1 class="title is-1">Map of Lost and Found Pets</h1>
    <div class="columns">
-      <div class="column is-one-third">
-      <!-- Map parameters go in here -->
-         <div class="field">
-            <label class="label">Location coordinates</label>
-            <div class="control">
-               <input class="input is-info" type="text" v-model="new_coord" placeholder="Coordinates">
-            </div>
-         </div>
-         <div class="has-text-danger" v-if="coord_inv">
-            Location coordinates are invalid. Error {{error_message}}
-         </div>
-         <div class="field">
-            <label class="label">Range</label>
-            <div class="control">
-               <input type="range" v-model="new_radius" @change="app.new_radius = this.value;" style="width: 100%;" min="0.5" max="20.0" step="0.5">
-            </div>
-            {{new_radius}} mile<span v-if="new_radius != 1">s</span>
-         </div>
-         <div class="field">
-            <label class="label">Lost or Found</label>
-            <input type="radio" name="lorf" v-model="search_lorf" value="lost" checked> Lost
-            <input type="radio" name="lorf" v-model="search_lorf" value="found"> Found
-         </div>
-         <button class="button is-link" @click="load_pins();">Load locations</button>
-      </div>
+      
       <div class="column">
-         <iframe src="https://maps.google.com/maps?output=embed" style="border: 0; border-radius: 4px; height: 500px; width: 100%; verflow: hidden;"></iframe>
+
+         <div id="map" style="height: 400px; width: 100%;">
+            
+         </div>
+
+         <script>
+
+            function initMap(){
+               var options = {
+                  zoom:12,
+                  center: {lat: 36.994799, lng: -122.05844}
+               }
+
+               var map = new google.maps.Map(document.getElementById("map"), options);
+
+               const marker = new google.maps.Marker({
+                   position: {lat: 36.994799, lng: -122.05844}, 
+                   map: map,
+                   icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'
+               });
+
+               const marker2 = new google.maps.Marker({
+                   position: {lat: 36.992102, lng: -122.043847}, 
+                   map: map,
+               });
+
+               const marker3 = new google.maps.Marker({
+                   position: {lat: 36.983213, lng: -122.025593}, 
+                   map: map,
+               });
+
+               const marker4 = new google.maps.Marker({
+                   position: {lat: 36.983954, lng:-122.014069}, 
+                   map: map,
+               });
+
+               const marker5 = new google.maps.Marker({
+                   position: {lat: 36.977425, lng: -122.006535}, 
+                   map: map,
+               });
+
+               const marker6 = new google.maps.Marker({
+                   position: {lat: 36.9669, lng: -122.03059}, 
+                   map: map,
+               });
+
+               const marker7 = new google.maps.Marker({
+                   position: {lat: 36.968036, lng: -122.065659}, 
+                   map: map,
+               });
+
+               const marker8 = new google.maps.Marker({
+                   position: {lat: 36.9669555, lng: -122.0305684}, 
+                   map: map,
+               });
+
+               const marker9 = new google.maps.Marker({
+                   position: {lat: 36.9898548, lng: -122.0500853}, 
+                   map: map,
+               });
+
+               const marker10 = new google.maps.Marker({
+                   position: {lat: 36.98, lng: -122.06}, 
+                   map: map,
+               });
+
+               const marker11 = new google.maps.Marker({
+                   position: {lat: 36.99, lng: -122.065}, 
+                   map: map,
+               });
+
+               const marker12 = new google.maps.Marker({
+                   position: {lat: 36.999, lng: -122.0647}, 
+                   map: map,
+               });
+            }
+         </script>
+
+         <script async
+             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_WqBF-BSYZ8s1R5zgFOWpPa35eQYq-TM&callback=initMap"
+             defer>
+         </script>
+
       </div>
    </div>
 </div>
