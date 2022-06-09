@@ -1,11 +1,10 @@
 ## Find-My-Pet Project ##
 
+*** Implementation doc link: https://docs.google.com/document/d/1130yAXt0RpwTg-GckpYLtwEhn4_8__UxMxRRNdmRoCU/edit?usp=sharing ***
+
 The goal is to reunite people with their pets utilizing a web application
 that takes posts, displays posts, and show where these posts originated on
 a map. We also have user interaction via comments on the posts.
-
-## Utility
-TBD - Test
 
 ## General
 
