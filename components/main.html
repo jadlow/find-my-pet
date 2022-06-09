@@ -10,7 +10,9 @@
         <div class="tile is-parent is-3 is-vertical">
             <div class="box">
             <h1 class="title">Search</h1>
-            
+            <label class="label">Set Location Coords 
+                <span class="icon has-text-info" @click="show_get_coord_info = true"><i class="fa fa-info-circle"></i></span>
+            </label>
             <input id="locInp" placeholder="Ex: 33, 67" type="text" v-model="query" @blur="search" class="input is-info">
             <div class="has-text-danger" v-if="coord_inv">
                 Location coordinates are invalid. Error {{ error_message }}
